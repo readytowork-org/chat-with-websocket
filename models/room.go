@@ -2,7 +2,8 @@ package models
 
 type Room struct {
 	Base
-	Title string `json:"title"`
+	Name    string `json:"name"`
+	OwnerId int    `json:"owner_id"`
 }
 
 func (r Room) TableName() string {
