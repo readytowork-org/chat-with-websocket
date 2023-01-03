@@ -16,6 +16,6 @@ func NewRoomService(repository repository.RoomRepository) RoomService {
 }
 
 func (c RoomService) CreateRoom(room models.Room) error {
-	err := c.repository.CreateRoom(room)
-	return err
+	return c.repository.CreateRoom(room)
+
 }

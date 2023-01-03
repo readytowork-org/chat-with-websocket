@@ -15,12 +15,12 @@ type Router struct {
 	Gin *gin.Engine
 }
 
-//NewRouter : all the routes are defined here
+// NewRouter : all the routes are defined here
 func NewRouter(env Env) Router {
 
 	if env.Environment != "local" {
 		if err := sentry.Init(sentry.ClientOptions{
-			Dsn:              env.SentryDSN,
+			Dsn:              "",
 			Environment:      `boilerplate-backend-` + env.Environment,
 			AttachStacktrace: true,
 		}); err != nil {

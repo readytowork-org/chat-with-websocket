@@ -16,32 +16,12 @@ type Env struct {
 	DBHost      string `mapstructure:"DBHost"`
 	DBPort      string `mapstructure:"DBPort"`
 	DBName      string `mapstructure:"DBName"`
-	SentryDSN   string `mapstructure:"SentryDSN"`
-
-	StorageBucketName string `mapstructure:"StorageBucketName"`
-
-	AdminEmail string `mapstructure:"AdminEmail"`
-	AdminPass  string `mapstructure:"AdminPass"`
-
-	MailClientID     string `mapstructure:"MailClientID"`
-	MailClientSecret string `mapstructure:"MailClientSecret"`
-	MailAccesstoken  string `mapstructure:"MailAccessToken"`
-	MailRefreshToken string `mapstructure:"MailRefreshToken"`
-
-	AWS_S3_REGION  string `mapstructure:"AWS_S3_REGION"`
-	AWS_S3_BUCKET  string `mapstructure:"AWS_S3_BUCKET"`
-	AWS_ACCESS_KEY string `mapstructure:"AWS_ACCESS_KEY"`
-	AWS_SECRET_KEY string `mapstructure:"AWS_SECRET_KEY"`
-
-	TwilioBaseURL   string `mapstructure:"TWILIO_BASE_URL"`
-	TwilioSID       string `mapstructure:"TWILIO_SID"`
-	TwilioAuthToken string `mapstructure:"TWILIO_AUTH_TOKEN"`
-	TwilioSMSFrom   string `mapstructure:"TWILIO_SMS_FROM"`
 }
 
 // NewEnv creates a new environment
 func NewEnv() Env {
 	env := Env{}
+	// viper.AddConfigPath("../")
 	viper.SetConfigFile(".env")
 
 	if err := viper.ReadInConfig(); err != nil {

@@ -21,16 +21,12 @@ type Application struct {
 // NewApplication creates new cli application
 func NewApplication(
 	logger infrastructure.Logger,
-	createAdminUser CreateAdminUser,
-	createDummyAdminUser CreateDummyAdminUser,
 	createSeedData CreateSeedData,
 ) Application {
 	return Application{
 		logger: logger,
 		commands: []Command{
-			createAdminUser,
 			createSeedData,
-			createDummyAdminUser,
 		},
 	}
 }
