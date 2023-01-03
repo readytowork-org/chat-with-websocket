@@ -12,23 +12,27 @@ import (
 )
 
 type RoomController struct {
-	logger      infrastructure.Logger
-	roomService services.RoomService
-	env         infrastructure.Env
+	logger          infrastructure.Logger
+	roomService     services.RoomService
+	userRoomService services.UserRoomService
+	env             infrastructure.Env
 }
 
 func NewRoomController(logger infrastructure.Logger,
 	roomService services.RoomService,
+	userRoomService services.UserRoomService,
 	env infrastructure.Env) RoomController {
 	return RoomController{
-		logger:      logger,
-		roomService: roomService,
-		env:         env,
+		logger:          logger,
+		roomService:     roomService,
+		userRoomService: userRoomService,
+		env:             env,
 	}
 }
 
 func (cc RoomController) CreateRoom(c *gin.Context) {
 	room := models.Room{}
+	userRoom := models.UserRoom{}
 
 	if err := c.ShouldBindJSON(&room); err != nil {
 		cc.logger.Zap.Error("Error [CreatRoom] (ShouldBindJson) :", err)
@@ -36,6 +40,15 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 		responses.HandleError(c, err)
 		return
 	}
+
+	err := cc.roomService.CreateRoom(room)
+	if err != nil {
+		cc.logger.Zap.Error("Error [CreatRoom] (CreateRoom) :", err)
+		err := errors.BadRequest.Wrap(err, "Failed to Create Room")
+		responses.HandleError(c, err)
+		return
+	}
+	cc.userRoomService.CreateUserRoom(userRoom)
 
 	responses.SuccessJSON(c, http.StatusOK, "Room Created Successfully")
 }
