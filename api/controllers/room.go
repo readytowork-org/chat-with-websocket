@@ -8,6 +8,7 @@ import (
 	"boilerplate-api/infrastructure"
 	"boilerplate-api/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -63,4 +64,18 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 	}
 
 	responses.SuccessJSON(c, http.StatusOK, "Room Created Successfully")
+}
+
+func (cc RoomController) GetRoomWithUser(c *gin.Context) {
+	ID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	room, err := cc.roomService.GetRoomWithUser(ID)
+	if err != nil {
+		cc.logger.Zap.Error("Error finding users room records", err.Error())
+		err := errors.InternalError.Wrap(err, "Failed to get users room data")
+		responses.HandleError(c, err)
+		return
+	}
+
+	responses.SuccessJSON(c, http.StatusOK, room)
+
 }
