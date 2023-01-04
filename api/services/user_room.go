@@ -3,6 +3,8 @@ package services
 import (
 	"boilerplate-api/api/repository"
 	"boilerplate-api/models"
+
+	"gorm.io/gorm"
 )
 
 type UserRoomService struct {
@@ -13,6 +15,11 @@ func NewUserRoomService(repository repository.UserRoomRepository) UserRoomServic
 	return UserRoomService{
 		repository: repository,
 	}
+}
+
+func (c UserRoomService) WithTrx(trxHandle *gorm.DB) UserRoomService {
+	c.repository = c.repository.WithTrx(trxHandle)
+	return c
 }
 
 func (c UserRoomService) CreateUserRoom(userRoom models.UserRoom) error {
