@@ -3,6 +3,8 @@ package repository
 import (
 	"boilerplate-api/infrastructure"
 	"boilerplate-api/models"
+
+	"gorm.io/gorm"
 )
 
 type UserRoomRepository struct {
@@ -16,6 +18,15 @@ func NewUserRoomRepository(db infrastructure.Database,
 		db:     db,
 		logger: logger,
 	}
+}
+
+func (c UserRoomRepository) WithTrx(trxHandle *gorm.DB) UserRoomRepository {
+	if trxHandle == nil {
+		c.logger.Zap.Error("Transaction Database not found in gin context. ")
+		return c
+	}
+	c.db.DB = trxHandle
+	return c
 }
 
 func (c UserRoomRepository) CreateUserRoom(userRoom models.UserRoom) error {
