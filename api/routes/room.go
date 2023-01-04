@@ -18,6 +18,7 @@ func (i RoomRoutes) Setup() {
 	rooms := i.router.Gin.Group("/rooms")
 	{
 		rooms.POST("", i.trxMiddleware.DBTransactionHandle(), i.roomController.CreateRoom)
+		rooms.GET(":id", i.roomController.GetRoomWithUser)
 	}
 }
 
