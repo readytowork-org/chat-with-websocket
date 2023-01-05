@@ -39,6 +39,7 @@ func bootstrap(
 	cliApp cli.Application,
 	migrations infrastructure.Migrations,
 	seeds seeds.Seeds,
+	server *infrastructure.WsServer,
 ) {
 
 	appStop := func(context.Context) error {
@@ -69,6 +70,11 @@ func bootstrap(
 			logger.Zap.Info("------ Boilerplate 📺 ------")
 			logger.Zap.Info("------------------------")
 
+			go func() {
+				logger.Zap.Info("Running WsServer...")
+
+				server.Run()
+			}()
 			logger.Zap.Info("Migrating DB schema...")
 			go func() {
 				migrations.Migrate()
@@ -78,7 +84,7 @@ func bootstrap(
 				seeds.Run()
 				if env.ServerPort == "" {
 					handler.Gin.Run(":5000")
-					} else {
+				} else {
 					handler.Gin.Run(":" + env.ServerPort)
 				}
 			}()
