@@ -9,4 +9,5 @@ var Module = fx.Options(
 	fx.Provide(NewEnv),
 	fx.Provide(NewDatabase),
 	fx.Provide(NewMigrations),
+	fx.Provide(NewWebscoketServer),
 )
