@@ -3,7 +3,6 @@ package infrastructure
 import (
 	"boilerplate-api/models"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -43,7 +42,6 @@ type WsClient struct {
 
 func NewClient(conn *websocket.Conn,
 	wsServer *WsServer,
-	// name string
 ) *WsClient {
 	wsClient := &WsClient{
 		// Client: models.User{
@@ -56,20 +54,6 @@ func NewClient(conn *websocket.Conn,
 		// rooms:    make(map[*models.Room]bool),
 	}
 	return wsClient
-}
-
-func ServerWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-	}
-
-	client := NewClient(conn, wsServer)
-
-	go client.writePump()
-	go client.readPump()
-
-	wsServer.Register <- client
 }
 
 func (client *WsClient) readPump() {

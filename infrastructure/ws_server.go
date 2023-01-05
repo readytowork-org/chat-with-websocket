@@ -1,6 +1,10 @@
 package infrastructure
 
-import "boilerplate-api/models"
+import (
+	"boilerplate-api/models"
+
+	"github.com/gin-gonic/gin"
+)
 
 type WsServer struct {
 	Clients    map[*WsClient]bool
@@ -8,17 +12,32 @@ type WsServer struct {
 	UnRegister chan *WsClient
 	Broadcase  chan []byte
 	Rooms      map[*models.Room]bool
+	logger     Logger
 }
 
 func NewWebscoketServer() *WsServer {
-	wsServer := &WsServer{
+	return &WsServer{
 		Clients:    make(map[*WsClient]bool),
 		Register:   make(chan *WsClient),
 		UnRegister: make(chan *WsClient),
 		Broadcase:  make(chan []byte),
 		Rooms:      make(map[*models.Room]bool),
 	}
-	return wsServer
+}
+
+func (w *WsServer) ServerWs(c *gin.Context) {
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		w.logger.Zap.Error("Error creating upgrader ", err.Error())
+		return
+	}
+
+	client := NewClient(conn, w)
+
+	go client.writePump()
+	go client.readPump()
+
+	w.Register <- client
 }
 
 func (server *WsServer) Run() {
