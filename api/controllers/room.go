@@ -76,6 +76,6 @@ func (cc RoomController) GetRoomWithUser(c *gin.Context) {
 		return
 	}
 
-	responses.SuccessJSON(c, http.StatusOK, room)
+	responses.JSON(c, http.StatusOK, room)
 
 }
