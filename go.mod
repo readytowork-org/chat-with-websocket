@@ -9,6 +9,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/joho/godotenv v1.4.0
 	github.com/manifoldco/promptui v0.8.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
