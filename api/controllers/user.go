@@ -46,14 +46,15 @@ func (cc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	if err := cc.userService.WithTrx(trx).CreateUser(user); err != nil {
+	ru, err := cc.userService.WithTrx(trx).CreateUser(user)
+	if err != nil {
 		cc.logger.Zap.Error("Error [CreateUser] [db CreateUser]: ", err.Error())
 		err := errors.InternalError.Wrap(err, "Failed to create user")
 		responses.HandleError(c, err)
 		return
 	}
 
-	responses.SuccessJSON(c, http.StatusOK, "User Created Sucessfully")
+	responses.JSON(c, http.StatusOK, ru)
 }
 
 // GetAllUser -> Get All User
