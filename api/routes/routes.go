@@ -23,11 +23,13 @@ func NewRoutes(
 	userRoutes UserRoutes,
 	roomRoutes RoomRoutes,
 	serverRoutes ServerRoute,
+	firebaseRoutes FirebaseRoutes,
 ) Routes {
 	return Routes{
 		userRoutes,
 		roomRoutes,
 		serverRoutes,
+		firebaseRoutes,
 	}
 }
 
