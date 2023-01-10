@@ -2,12 +2,14 @@ package routes
 
 import (
 	"boilerplate-api/api/controllers"
+	"boilerplate-api/api/middlewares"
 	"boilerplate-api/infrastructure"
 )
 
 type FirebaseRoutes struct {
 	firebaseController controllers.FirebaseController
 	router             infrastructure.Router
+	firebaseAuth       middlewares.FirebaseAuthMiddleWare
 }
 
 func NewFirebaseRoutes(
@@ -20,8 +22,8 @@ func NewFirebaseRoutes(
 }
 
 func (fr FirebaseRoutes) Setup() {
-	firebase := fr.router.Gin.Group("fb").Use()
+	firebase := fr.router.Gin.Group("fb").Use(fr.firebaseAuth.AuthJWT())
 	{
-		firebase.GET("/", fr.firebaseController.CreateUser)
+		firebase.POST("/create", fr.firebaseController.CreateUser)
 	}
 }
