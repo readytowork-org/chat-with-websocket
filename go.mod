@@ -3,7 +3,7 @@ module boilerplate-api
 go 1.16
 
 require (
-	firebase.google.com/go v3.13.0+incompatible // indirect
+	firebase.google.com/go v3.13.0+incompatible
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.4
@@ -17,6 +17,7 @@ require (
 	go.uber.org/fx v1.14.2
 	go.uber.org/zap v1.21.0
 	golang.org/x/text v0.4.0
+	google.golang.org/api v0.102.0
 	gorm.io/driver/mysql v1.1.2
 	gorm.io/gorm v1.21.16
 )
