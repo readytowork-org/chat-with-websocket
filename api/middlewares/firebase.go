@@ -1,14 +1,27 @@
 package middlewares
 
 import (
+	"boilerplate-api/api/services"
 	"net/http"
 	"strings"
 
-	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
 )
 
-func authJWT(client *auth.Client) gin.HandlerFunc {
+type FirebaseAuthMiddleWare struct {
+	service services.FirebaseService
+}
+
+func NewFirebaseAuthMiddleware(
+	service services.FirebaseService,
+
+) FirebaseAuthMiddleWare {
+	return FirebaseAuthMiddleWare{
+		service: service,
+	}
+}
+
+func (client FirebaseAuthMiddleWare) AuthJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authorizationToken := c.GetHeader("Authorization")
 		idToken := strings.TrimSpace(strings.Replace(authorizationToken, "Bearer", "", 1))
@@ -19,7 +32,7 @@ func authJWT(client *auth.Client) gin.HandlerFunc {
 			return
 		}
 
-		token, err := client.VerifyIDToken(c, idToken)
+		token, err := client.service.VerifyToken(idToken)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid token"})
 			c.Abort()
