@@ -18,25 +18,25 @@ import (
 type UserController struct {
 	logger      infrastructure.Logger
 	userService services.UserService
-	env         infrastructure.Env
+	fbService   services.FirebaseService
 }
 
 // NewUserController -> constructor
 func NewUserController(
 	logger infrastructure.Logger,
 	userService services.UserService,
-	env infrastructure.Env,
+	fbService services.FirebaseService,
 ) UserController {
 	return UserController{
 		logger:      logger,
 		userService: userService,
-		env:         env,
+		fbService:   fbService,
 	}
 }
 
 // CreateUser -> Create User
 func (cc UserController) CreateUser(c *gin.Context) {
-	user := models.User{}
+	user := models.FirebaseAuthUser{}
 	trx := c.MustGet(constants.DBTransaction).(*gorm.DB)
 
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -46,7 +46,17 @@ func (cc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	ru, err := cc.userService.WithTrx(trx).CreateUser(user)
+	fbUser, err := cc.fbService.CreateUser(user)
+	if err != nil {
+		cc.logger.Zap.Error("Error [CreateUser] [fb CreateUser]: ", err.Error())
+		err := errors.InternalError.Wrap(err, "Failed to create user")
+		responses.HandleError(c, err)
+		return
+	}
+
+	user.ID = fbUser.UID
+
+	newUser, err := cc.userService.WithTrx(trx).CreateUser(user.User)
 	if err != nil {
 		cc.logger.Zap.Error("Error [CreateUser] [db CreateUser]: ", err.Error())
 		err := errors.InternalError.Wrap(err, "Failed to create user")
@@ -54,7 +64,7 @@ func (cc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	responses.JSON(c, http.StatusOK, ru)
+	responses.JSON(c, http.StatusOK, newUser)
 }
 
 // GetAllUser -> Get All User

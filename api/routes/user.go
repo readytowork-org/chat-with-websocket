@@ -18,10 +18,12 @@ type UserRoutes struct {
 // Setup user routes
 func (i UserRoutes) Setup() {
 	i.logger.Zap.Info(" Setting up user routes")
+
+	i.router.Gin.POST("/users", i.trxMiddleware.DBTransactionHandle(), i.userController.CreateUser)
+
 	users := i.router.Gin.Group("/users").Use(i.firebaseAuth.AuthJWT())
 	{
 		users.GET("", i.userController.GetAllUsers)
-		users.POST("", i.trxMiddleware.DBTransactionHandle(), i.userController.CreateUser)
 	}
 }
 
