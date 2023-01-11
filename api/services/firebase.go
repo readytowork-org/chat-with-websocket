@@ -9,7 +9,7 @@ import (
 )
 
 type FirebaseService struct {
-	fbAuth *auth.Client
+	auth   *auth.Client
 	logger infrastructure.Logger
 }
 
@@ -18,29 +18,21 @@ func NewFirebaseService(
 	logger infrastructure.Logger,
 ) FirebaseService {
 	return FirebaseService{
-		fbAuth: fbAuth,
+		auth:   fbAuth,
 		logger: logger,
 	}
 }
 
 func (fb *FirebaseService) VerifyToken(idToken string) (*auth.Token, error) {
-	token, err := fb.fbAuth.VerifyIDToken(context.Background(), idToken)
+	token, err := fb.auth.VerifyIDToken(context.Background(), idToken)
 	return token, err
 }
-func (c FirebaseService) CreateUser(newUser models.FirebaseAuthUser) (*auth.UserRecord, error) {
-	user := (&auth.UserToCreate{}).Email(newUser.Email).DisplayName(newUser.DisplayName)
-	record, err := c.fbAuth.CreateUser(context.Background(), user)
+
+func (fb *FirebaseService) CreateUser(newUser models.FirebaseAuthUser) (*auth.UserRecord, error) {
+	user := (&auth.UserToCreate{}).Email(newUser.Email).DisplayName(newUser.FullName).Password(newUser.Password)
+	record, err := fb.auth.CreateUser(context.Background(), user)
 	if err != nil {
-		c.logger.Zap.Info(err)
-	}
-	claims := map[string]interface{}{
-		"role":   newUser.Role,
-		"fb_uid": record.UID,
-		"id":     newUser.UserId,
-	}
-	err = c.fbAuth.SetCustomUserClaims(context.Background(), record.UID, claims)
-	if err != nil {
-		return nil, err
+		fb.logger.Zap.Info(err)
 	}
 	return record, err
 }

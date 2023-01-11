@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-func NewFbApp(logger Logger) (*auth.Client, error) {
+func NewFbApp() (*auth.Client, error) {
 	ctx := context.Background()
 	serviceAccountKeyFilePath, err := filepath.Abs("./serviceAccountKey.json")
 	if err != nil {
