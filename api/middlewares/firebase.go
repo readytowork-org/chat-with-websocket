@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"boilerplate-api/api/services"
+	"boilerplate-api/constants"
 	"net/http"
 	"strings"
 
@@ -39,7 +40,7 @@ func (client FirebaseAuthMiddleWare) AuthJWT() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("UUID", token.UID)
+		c.Set(constants.UID, token.UID)
 		c.Next()
 	}
 }

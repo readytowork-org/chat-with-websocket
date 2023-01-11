@@ -37,6 +37,7 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 	room := models.Room{}
 	userRoom := models.UserRoom{}
 	transaction := c.MustGet(constants.DBTransaction).(*gorm.DB)
+	uid := c.MustGet(constants.UID).(string)
 
 	if err := c.ShouldBindJSON(&room); err != nil {
 		cc.logger.Zap.Error("Error [CreatRoom] (ShouldBindJson) :", err)
@@ -52,7 +53,7 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 		responses.HandleError(c, err)
 		return
 	}
-	userRoom.UserId = room.OwnerId
+	userRoom.UserId = uid
 	userRoom.RoomId = room.ID
 	err = cc.userRoomService.WithTrx(transaction).CreateUserRoom(userRoom)
 
