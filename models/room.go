@@ -2,8 +2,7 @@ package models
 
 type Room struct {
 	Base
-	Name    string `json:"name"`
-	OwnerId int    `json:"owner_id"`
+	Name string `json:"name"`
 }
 
 func (r Room) TableName() string {

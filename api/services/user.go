@@ -27,9 +27,9 @@ func (c UserService) WithTrx(trxHandle *gorm.DB) UserService {
 }
 
 // CreateUser -> call to create the User
-func (c UserService) CreateUser(user models.User) error {
-	err := c.repository.Create(user)
-	return err
+func (c UserService) CreateUser(user models.User) (models.User, error) {
+	return c.repository.Create(user)
+
 }
 
 // GetAllUser -> call to get all the User

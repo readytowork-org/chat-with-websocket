@@ -12,15 +12,18 @@ type UserRoutes struct {
 	router         infrastructure.Router
 	userController controllers.UserController
 	trxMiddleware  middlewares.DBTransactionMiddleware
+	firebaseAuth   middlewares.FirebaseAuthMiddleWare
 }
 
 // Setup user routes
 func (i UserRoutes) Setup() {
 	i.logger.Zap.Info(" Setting up user routes")
-	users := i.router.Gin.Group("/users")
+
+	i.router.Gin.POST("/users", i.trxMiddleware.DBTransactionHandle(), i.userController.CreateUser)
+
+	users := i.router.Gin.Group("/users").Use(i.firebaseAuth.AuthJWT())
 	{
 		users.GET("", i.userController.GetAllUsers)
-		users.POST("", i.trxMiddleware.DBTransactionHandle(), i.userController.CreateUser)
 	}
 }
 
@@ -30,11 +33,13 @@ func NewUserRoutes(
 	router infrastructure.Router,
 	userController controllers.UserController,
 	trxMiddleware middlewares.DBTransactionMiddleware,
+	firebaseAuth middlewares.FirebaseAuthMiddleWare,
 ) UserRoutes {
 	return UserRoutes{
 		router:         router,
 		logger:         logger,
 		userController: userController,
 		trxMiddleware:  trxMiddleware,
+		firebaseAuth:   firebaseAuth,
 	}
 }

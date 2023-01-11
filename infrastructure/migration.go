@@ -8,13 +8,13 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-//Migrations -> Migration Struct
+// Migrations -> Migration Struct
 type Migrations struct {
 	logger Logger
 	env    Env
 }
 
-//NewMigrations -> return new Migrations struct
+// NewMigrations -> return new Migrations struct
 func NewMigrations(
 	logger Logger,
 	env Env,
@@ -25,7 +25,7 @@ func NewMigrations(
 	}
 }
 
-//Migrate -> migrates all table
+// Migrate -> migrates all table
 func (m Migrations) Migrate() {
 	m.logger.Zap.Info("Migrating schemas...")
 
@@ -49,9 +49,12 @@ func (m Migrations) Migrate() {
 	}
 
 	migrations, err := migrate.New("file://migration/", "mysql://"+dsn)
-
+	if err != nil {
+		m.logger.Zap.Error("Error in migration: ", err.Error())
+		return
+	}
 	m.logger.Zap.Info("--- Running Migration ---")
-	err = migrations.Steps(1000)
+	err = migrations.Up()
 	if err != nil {
 		m.logger.Zap.Error("Error in migration: ", err.Error())
 	}
