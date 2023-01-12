@@ -54,7 +54,7 @@ func (cc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	user.ID = fbUser.UID
+	user.User.ID = fbUser.UID
 
 	newUser, err := cc.userService.WithTrx(trx).CreateUser(user.User)
 	if err != nil {
