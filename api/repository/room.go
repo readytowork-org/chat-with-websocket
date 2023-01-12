@@ -33,7 +33,7 @@ func (c RoomRepository) CreateRoom(Room models.Room) (models.Room, error) {
 	return Room, c.db.DB.Create(&Room).Error
 }
 
-func (c RoomRepository) GetRoomWithUser(userID int64) ([]models.Room, error) {
+func (c RoomRepository) GetRoomWithUser(userID string) ([]models.Room, error) {
 
 	userRoom := []models.Room{}
 
