@@ -8,7 +8,6 @@ import (
 	"boilerplate-api/infrastructure"
 	"boilerplate-api/models"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -68,7 +67,7 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 }
 
 func (cc RoomController) GetRoomWithUser(c *gin.Context) {
-	ID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	ID := c.MustGet(constants.UID).(string)
 	room, err := cc.roomService.GetRoomWithUser(ID)
 	if err != nil {
 		cc.logger.Zap.Error("Error finding users room records", err.Error())
