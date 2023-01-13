@@ -8,6 +8,7 @@ import (
 	"boilerplate-api/infrastructure"
 	"boilerplate-api/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -17,18 +18,21 @@ type RoomController struct {
 	logger          infrastructure.Logger
 	roomService     services.RoomService
 	userRoomService services.UserRoomService
+	messageService  services.MessageService
 	env             infrastructure.Env
 }
 
 func NewRoomController(logger infrastructure.Logger,
 	roomService services.RoomService,
 	userRoomService services.UserRoomService,
+	messageService services.MessageService,
 	env infrastructure.Env) RoomController {
 	return RoomController{
 		logger:          logger,
 		roomService:     roomService,
 		userRoomService: userRoomService,
 		env:             env,
+		messageService:  messageService,
 	}
 }
 
@@ -77,5 +81,22 @@ func (cc RoomController) GetRoomWithUser(c *gin.Context) {
 	}
 
 	responses.JSON(c, http.StatusOK, room)
+
+}
+
+func (cc RoomController) GetRoomsMessages(c *gin.Context) {
+	ID := c.MustGet(constants.UID).(string)
+
+	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
+
+	messages, err := cc.messageService.GetMessageWithUser(ID, roomId)
+	if err != nil {
+		cc.logger.Zap.Error("Error finding user room's message", err.Error())
+		err := errors.InternalError.Wrap(err, "Failed to get users room message")
+		responses.HandleError(c, err)
+		return
+	}
+
+	responses.JSON(c, http.StatusOK, messages)
 
 }
