@@ -9,7 +9,7 @@ import (
 type RoomRoutes struct {
 	logger         infrastructure.Logger
 	router         infrastructure.Router
-	wsServer       *infrastructure.WsServer
+	wsServer       *controllers.WsServer
 	roomController controllers.RoomController
 	middleWare     middlewares.FirebaseAuthMiddleWare
 	trxMiddleware  middlewares.DBTransactionMiddleware
@@ -33,7 +33,7 @@ func NewRoomRoutes(
 	roomController controllers.RoomController,
 	middleWare middlewares.FirebaseAuthMiddleWare,
 	trxMiddleware middlewares.DBTransactionMiddleware,
-	wsServer *infrastructure.WsServer,
+	wsServer *controllers.WsServer,
 ) RoomRoutes {
 	return RoomRoutes{
 		logger:         logger,
