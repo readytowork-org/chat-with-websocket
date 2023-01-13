@@ -30,3 +30,7 @@ func (c RoomService) CreateRoom(room models.Room) (models.Room, error) {
 func (c RoomService) GetRoomWithUser(ID string) ([]models.Room, error) {
 	return c.repository.GetRoomWithUser(ID)
 }
+
+func (c RoomService) GetRoomWithId(roomId int64) (room models.Room, err error) {
+	return c.repository.GetRoomWithId(roomId)
+}

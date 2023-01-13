@@ -42,3 +42,8 @@ func (c RoomRepository) GetRoomWithUser(userID string) ([]models.Room, error) {
 	err := queryBuilder.Find(&userRoom).Error
 	return userRoom, err
 }
+
+func (c RoomRepository) GetRoomWithId(roomId int64) (room models.Room, err error) {
+
+	return room, c.db.DB.Model(&models.Room{}).Where("id =?", roomId).First(&room).Error
+}
