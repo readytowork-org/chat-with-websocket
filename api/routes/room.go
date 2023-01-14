@@ -23,7 +23,6 @@ func (i RoomRoutes) Setup() {
 		rooms.GET("/get-rooms", i.roomController.GetRoomWithUser)
 		rooms.GET("/chat/:room-id", i.wsServer.ServerWs)
 		rooms.GET("/messages/:room-id", i.roomController.GetRoomsMessages)
-
 	}
 }
 

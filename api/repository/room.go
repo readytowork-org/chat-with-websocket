@@ -33,17 +33,14 @@ func (c RoomRepository) CreateRoom(Room models.Room) (models.Room, error) {
 	return Room, c.db.DB.Create(&Room).Error
 }
 
-func (c RoomRepository) GetRoomWithUser(userID string) ([]models.Room, error) {
-
-	userRoom := []models.Room{}
-
-	queryBuilder := c.db.DB.Model(&models.Room{}).Joins("JOIN user_rooms on rooms.id = user_rooms.room_id").
-		Where("user_rooms.user_id = ?", userID).Find(&userRoom)
-	err := queryBuilder.Find(&userRoom).Error
-	return userRoom, err
+func (c RoomRepository) GetRoomWithUser(userID string) (userRoom []models.Room, err error) {
+	queryBuilder := c.db.DB.Model(&models.Room{}).
+		Joins("JOIN user_rooms on rooms.id = user_rooms.room_id").
+		Where("user_rooms.user_id = ?", userID).
+		Find(&userRoom)
+	return userRoom, queryBuilder.Find(&userRoom).Error
 }
 
-func (c RoomRepository) GetRoomWithId(roomId int64) (room models.Room, err error) {
-
+func (c RoomRepository) GetRoomById(roomId int64) (room models.Room, err error) {
 	return room, c.db.DB.Model(&models.Room{}).Where("id =?", roomId).First(&room).Error
 }

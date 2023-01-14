@@ -52,7 +52,7 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 	room, err := cc.roomService.WithTrx(transaction).CreateRoom(room)
 	if err != nil {
 		cc.logger.Zap.Error("Error [CreatRoom] (CreateRoom) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to Create Room")
+		err := errors.BadRequest.Wrap(err, "Failed to Create room")
 		responses.HandleError(c, err)
 		return
 	}
@@ -62,16 +62,17 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 
 	if err != nil {
 		cc.logger.Zap.Error("Error [UserRoom] (userRoom) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to Create user Room")
+		err := errors.BadRequest.Wrap(err, "Failed to Create user room")
 		responses.HandleError(c, err)
 		return
 	}
 
-	responses.SuccessJSON(c, http.StatusOK, "Room Created Successfully")
+	responses.SuccessJSON(c, http.StatusOK, "room Created Successfully")
 }
 
 func (cc RoomController) GetRoomWithUser(c *gin.Context) {
 	ID := c.MustGet(constants.UID).(string)
+
 	room, err := cc.roomService.GetRoomWithUser(ID)
 	if err != nil {
 		cc.logger.Zap.Error("Error finding users room records", err.Error())
@@ -81,15 +82,12 @@ func (cc RoomController) GetRoomWithUser(c *gin.Context) {
 	}
 
 	responses.JSON(c, http.StatusOK, room)
-
 }
 
 func (cc RoomController) GetRoomsMessages(c *gin.Context) {
-	ID := c.MustGet(constants.UID).(string)
-
 	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
 
-	messages, err := cc.messageService.GetMessageWithUser(ID, roomId)
+	messages, err := cc.messageService.GetMessageWithUser(roomId)
 	if err != nil {
 		cc.logger.Zap.Error("Error finding user room's message", err.Error())
 		err := errors.InternalError.Wrap(err, "Failed to get users room message")
@@ -98,5 +96,4 @@ func (cc RoomController) GetRoomsMessages(c *gin.Context) {
 	}
 
 	responses.JSON(c, http.StatusOK, messages)
-
 }
