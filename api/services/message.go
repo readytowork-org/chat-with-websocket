@@ -17,11 +17,11 @@ func NewMessageService(
 	}
 }
 
-func (c MessageService) GetMessageWithUser(roomId int64) (messages []models.Message, err error) {
+func (c MessageService) GetMessageWithUser(roomId int64) (messages []models.UserMessage, err error) {
 	return c.repository.GetMessagesWithUser(roomId)
 }
 
 //SaveMessageToRoom -> Save message to room
-func (c MessageService) SaveMessageToRoom(message models.Message) (models.Message, error) {
+func (c MessageService) SaveMessageToRoom(message models.UserMessage) (models.UserMessage, error) {
 	return c.repository.SaveMessageToRoom(message)
 }

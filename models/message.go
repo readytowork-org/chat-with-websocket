@@ -7,6 +7,11 @@ type Message struct {
 	UserId string `json:"user_id"`
 }
 
+type UserMessage struct {
+	Message
+	User User `json:"user"`
+}
+
 func (m Message) TableName() string {
 	return "messages"
 }

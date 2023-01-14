@@ -41,9 +41,9 @@ func (chatRoom *ChatRoom) Run() {
 		case client := <-chatRoom.unRegister:
 			chatRoom.UnRegisterClient(client)
 		case message := <-chatRoom.broadcast:
-			dbMessage, err := chatRoom.messageService.SaveMessageToRoom(message)
+			dbMessage, err := chatRoom.messageService.SaveMessageToRoom(models.UserMessage{Message: message})
 			if err != nil {
-				chatRoom.logger.Zap.Error("No user found", err.Error())
+				chatRoom.logger.Zap.Error("Message saving failed", err.Error())
 				return
 			}
 			bytMsg, _ := json.Marshal(dbMessage)
