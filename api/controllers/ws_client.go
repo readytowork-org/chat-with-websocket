@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"boilerplate-api/models"
+	"encoding/json"
 	"log"
 	"time"
 
@@ -24,36 +25,31 @@ const (
 
 var (
 	newline = []byte{'\n'}
-	space   = []byte{' '}
 )
 
-var upgrader = websocket.Upgrader{
+var wsUpgrade = websocket.Upgrader{
 	ReadBufferSize:  4096,
 	WriteBufferSize: 4096,
 }
 
 type WsClient struct {
-	Client models.User
+	models.User
 	conn   *websocket.Conn
-	server *Server
+	server *ChatRoom
 	Send   chan []byte
-	rooms  map[*models.Room]bool
 }
 
-func NewClient(conn *websocket.Conn,
-	wsServer *Server,
+func NewClient(
+	conn *websocket.Conn,
+	server *ChatRoom,
+	user models.User,
 ) *WsClient {
-	wsClient := &WsClient{
-		// Client: models.User{
-		// 	Base:     uuid.New(),
-		// 	FullName: name,
-		// },
+	return &WsClient{
+		User:   user,
 		conn:   conn,
-		server: wsServer,
-		// Send:     make(chan []byte),
-		// rooms:    make(map[*models.Room]bool),
+		server: server,
+		Send:   make(chan []byte),
 	}
-	return wsClient
 }
 
 func (client *WsClient) readPump() {
@@ -69,14 +65,22 @@ func (client *WsClient) readPump() {
 	})
 
 	for {
-		_, jsonMessage, error := client.conn.ReadMessage()
-		if error != nil {
-			if websocket.IsUnexpectedCloseError(error, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("Unexpected close error : %v", error)
+		_, jsonMessage, err := client.conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("Unexpected close error : %v", err.Error())
 			}
 			break
 		}
-		client.server.Broadcase <- jsonMessage
+		message := models.Message{}
+		err = json.Unmarshal(jsonMessage, &message)
+		if err != nil {
+			client.server.logger.Zap.Error("Message parsing Error :: ", err.Error())
+			return
+		}
+		message.RoomId = client.server.ID
+		message.UserId = client.ID
+		client.server.broadcast <- message
 	}
 }
 func (client *WsClient) writePump() {
@@ -118,7 +122,7 @@ func (client *WsClient) writePump() {
 	}
 }
 func (client *WsClient) disconnect() {
-	client.server.UnRegister <- client
+	client.server.unRegister <- client
 	close(client.Send)
 	client.conn.Close()
 }
