@@ -3,6 +3,7 @@ package repository
 import (
 	"boilerplate-api/infrastructure"
 	"boilerplate-api/models"
+	"time"
 )
 
 //MessageRepository -> MessageRepository
@@ -23,8 +24,21 @@ func NewMessageRepository(
 }
 
 //GetMessagesWithUser -> Get messages with user
-func (c MessageRepository) GetMessagesWithUser(roomId int64) (messages []models.UserMessage, err error) {
-	return messages, c.db.DB.Model(&messages).Where("room_id = ?", roomId).Order("created_at DESC").Preload("User").Find(&messages).Error
+func (c MessageRepository) GetMessagesWithUser(roomId int64, cursor string) (messages []models.UserMessage, err error) {
+	queryBuilder := c.db.DB.
+		Model(&messages).
+		Where("room_id = ?", roomId)
+
+	if cursor != "" {
+		parsedCursor, _ := time.Parse(time.RFC3339, cursor)
+		queryBuilder = queryBuilder.Where("created_at < ?", parsedCursor)
+	}
+
+	return messages, queryBuilder.Order("created_at DESC").
+		Limit(20).
+		Preload("User").
+		Find(&messages).
+		Error
 }
 
 //SaveMessageToRoom -> Save message to room

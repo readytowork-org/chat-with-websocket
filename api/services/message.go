@@ -17,8 +17,8 @@ func NewMessageService(
 	}
 }
 
-func (c MessageService) GetMessageWithUser(roomId int64) (messages []models.UserMessage, err error) {
-	return c.repository.GetMessagesWithUser(roomId)
+func (c MessageService) GetMessageWithUser(roomId int64, cursor string) (messages []models.UserMessage, err error) {
+	return c.repository.GetMessagesWithUser(roomId, cursor)
 }
 
 //SaveMessageToRoom -> Save message to room
