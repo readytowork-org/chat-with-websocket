@@ -1,10 +1,18 @@
 package models
 
+type MessageSentStatus string
+
+const (
+	Sending MessageSentStatus = "Sending"
+	Sent    MessageSentStatus = "Sent"
+)
+
 type Message struct {
 	Base
-	Text   string `json:"text"`
-	RoomId int64  `json:"room_id"`
-	UserId string `json:"user_id"`
+	Text   string            `json:"text"`
+	Status MessageSentStatus `json:"status"`
+	RoomId int64             `json:"room_id"`
+	UserId string            `json:"user_id"`
 }
 
 type UserMessage struct {

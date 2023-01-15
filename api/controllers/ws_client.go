@@ -78,6 +78,7 @@ func (client *WsClient) readPump() {
 			client.server.logger.Zap.Error("Message parsing Error :: ", err.Error())
 			return
 		}
+		message.Status = models.Sent
 		message.RoomId = client.server.ID
 		message.UserId = client.ID
 		client.server.broadcast <- message
