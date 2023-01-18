@@ -20,7 +20,7 @@ func (i RoomRoutes) Setup() {
 	rooms := i.router.Gin.Group("/rooms").Use(i.middleWare.AuthJWT())
 	{
 		rooms.POST("/create", i.trxMiddleware.DBTransactionHandle(), i.roomController.CreateRoom)
-		rooms.GET("/get-rooms", i.roomController.GetRoomWithUser)
+		rooms.GET("/get-rooms/:cursor", i.roomController.GetRoomWithUser)
 		rooms.GET("/chat/:room-id", i.wsServer.ServerWs)
 		rooms.GET("/messages/:room-id/:cursor", i.roomController.GetRoomsMessages)
 
