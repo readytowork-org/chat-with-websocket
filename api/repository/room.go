@@ -3,6 +3,7 @@ package repository
 import (
 	"boilerplate-api/infrastructure"
 	"boilerplate-api/models"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -33,14 +34,15 @@ func (c RoomRepository) CreateRoom(Room models.Room) (models.Room, error) {
 	return Room, c.db.DB.Create(&Room).Error
 }
 
-func (c RoomRepository) GetRoomWithUser(userID string) ([]models.Room, error) {
-
-	userRoom := []models.Room{}
+func (c RoomRepository) GetRoomWithUser(userID string, cursor string) (userRooms []models.Room, err error) {
 
 	queryBuilder := c.db.DB.Model(&models.Room{}).Joins("JOIN user_rooms on rooms.id = user_rooms.room_id").
-		Where("user_rooms.user_id = ?", userID).Find(&userRoom)
-	err := queryBuilder.Find(&userRoom).Error
-	return userRoom, err
+		Where("user_rooms.user_id = ?", userID).Find(&userRooms).Limit(20)
+	if cursor != "" {
+		time, _ := time.Parse(time.RFC3339, cursor)
+		queryBuilder = queryBuilder.Where("created_at < ?", time)
+	}
+	return userRooms, queryBuilder.Error
 }
 
 func (c RoomRepository) GetRoomWithId(roomId int64) (room models.Room, err error) {
