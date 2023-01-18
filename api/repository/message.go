@@ -3,6 +3,7 @@ package repository
 import (
 	"boilerplate-api/infrastructure"
 	"boilerplate-api/models"
+	"time"
 )
 
 type MessageReposiotry struct {
@@ -18,6 +19,12 @@ func NewMessageRepository(
 	}
 }
 
-func (c MessageReposiotry) GetMessagesWithUser(userID string, roomId int64) (messages []models.Message, err error) {
-	return messages, c.db.DB.Model(&models.Message{}).Where("user_id = ?", userID).Where("room_id = ?", roomId).Find(&messages).Error
+func (c MessageReposiotry) GetMessagesWithUser( roomId int64, cursor string) (messages []models.Message, err error) {
+	queryBuilder := c.db.DB.Model(&models.Message{}).Order("created_at desc").Where("room_id =?", roomId).Find(&messages).Limit(20)
+	if cursor != "" {
+		time, _ := time.Parse(time.RFC3339, cursor)
+		queryBuilder = queryBuilder.Where("created_at < ?", time)
+	}
+
+	return messages, queryBuilder.Error
 }
