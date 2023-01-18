@@ -22,7 +22,7 @@ func (i RoomRoutes) Setup() {
 		rooms.POST("/create", i.trxMiddleware.DBTransactionHandle(), i.roomController.CreateRoom)
 		rooms.GET("/get-rooms", i.roomController.GetRoomWithUser)
 		rooms.GET("/chat/:room-id", i.wsServer.ServerWs)
-		rooms.GET("/messages/:room-id", i.roomController.GetRoomsMessages)
+		rooms.GET("/messages/:room-id/:cursor", i.roomController.GetRoomsMessages)
 
 	}
 }
