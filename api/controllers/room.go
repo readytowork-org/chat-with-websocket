@@ -85,11 +85,11 @@ func (cc RoomController) GetRoomWithUser(c *gin.Context) {
 }
 
 func (cc RoomController) GetRoomsMessages(c *gin.Context) {
-	ID := c.MustGet(constants.UID).(string)
+	cursor := c.Param("cursor")
 
 	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
 
-	messages, err := cc.messageService.GetMessageWithUser(ID, roomId)
+	messages, err := cc.messageService.GetMessageWithUser(roomId, cursor)
 	if err != nil {
 		cc.logger.Zap.Error("Error finding user room's message", err.Error())
 		err := errors.InternalError.Wrap(err, "Failed to get users room message")
