@@ -44,13 +44,9 @@ func NewClient(conn *websocket.Conn,
 	wsServer *Server,
 ) *WsClient {
 	wsClient := &WsClient{
-		// Client: models.User{
-		// 	Base:     uuid.New(),
-		// 	FullName: name,
-		// },
 		conn:   conn,
 		server: wsServer,
-		// Send:     make(chan []byte),
+		Send:   make(chan []byte),
 		// rooms:    make(map[*models.Room]bool),
 	}
 	return wsClient
@@ -70,6 +66,7 @@ func (client *WsClient) readPump() {
 
 	for {
 		_, jsonMessage, error := client.conn.ReadMessage()
+		print("Message : ", jsonMessage)
 		if error != nil {
 			if websocket.IsUnexpectedCloseError(error, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("Unexpected close error : %v", error)
