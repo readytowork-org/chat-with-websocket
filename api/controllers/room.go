@@ -72,7 +72,8 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 
 func (cc RoomController) GetRoomWithUser(c *gin.Context) {
 	ID := c.MustGet(constants.UID).(string)
-	room, err := cc.roomService.GetRoomWithUser(ID)
+	cursor := c.Param("cursor")
+	room, err := cc.roomService.GetRoomWithUser(ID, cursor)
 	if err != nil {
 		cc.logger.Zap.Error("Error finding users room records", err.Error())
 		err := errors.InternalError.Wrap(err, "Failed to get users room data")
