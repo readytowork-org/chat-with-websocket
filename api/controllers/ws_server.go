@@ -12,16 +12,18 @@ import (
 )
 
 type WsServer struct {
-	server      map[int]*Server
+	chatRoom    map[int64]*Server
 	logger      infrastructure.Logger
 	roomService services.RoomService
+	roomId      chan int64
 }
 
 func NewWebSocketServer(logger infrastructure.Logger, roomService services.RoomService) *WsServer {
 	return &WsServer{
 		logger:      logger,
-		server:      make(map[int]*Server),
+		chatRoom:    make(map[int64]*Server),
 		roomService: roomService,
+		roomId:      make(chan int64),
 	}
 }
 
@@ -50,15 +52,18 @@ func (w WsServer) ServerWs(c *gin.Context) {
 		conn.WriteMessage(websocket.TextMessage, bytMsg)
 		return
 	}
-	server := w.server[int(roomId)]
+	server := w.chatRoom[roomId]
 	if server == nil {
-		server = &Server{
+		w.chatRoom[roomId] = &Server{
 			Clients:    make(map[*WsClient]bool),
 			Register:   make(chan *WsClient),
 			UnRegister: make(chan *WsClient),
 			Broadcase:  make(chan []byte),
 			Room:       room,
 		}
+		w.roomId <- roomId
+
+		server = w.chatRoom[roomId]
 	}
 
 	client := NewClient(conn, server)
@@ -67,12 +72,18 @@ func (w WsServer) ServerWs(c *gin.Context) {
 	go client.readPump()
 
 	server.Register <- client
+
 }
 
 func (w WsServer) RunServer() {
-	for _, server := range w.server {
-		server.Run()
+
+	for {
+		select {
+		case room := <-w.roomId:
+			go w.chatRoom[room].Run()
+		}
 	}
+
 }
 
 func (server *Server) Run() {
@@ -100,6 +111,7 @@ func (server *Server) UnRegisterClient(client *WsClient) {
 }
 func (server *Server) BroadcastToClient(message []byte) {
 	for client := range server.Clients {
+		println("sending msg : ")
 		client.Send <- message
 	}
 }
