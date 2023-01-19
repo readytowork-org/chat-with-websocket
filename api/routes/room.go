@@ -23,6 +23,7 @@ func (i RoomRoutes) Setup() {
 		rooms.GET("/get-rooms/:cursor", i.roomController.GetRoomWithUser)
 		rooms.GET("/chat/:room-id", i.wsServer.ServerWs)
 		rooms.GET("/messages/:room-id/:cursor", i.roomController.GetRoomsMessages)
+		rooms.POST("/create-message/:room-id", i.roomController.CreateMessageWithUser)
 
 	}
 }
