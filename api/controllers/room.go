@@ -85,6 +85,33 @@ func (cc RoomController) GetRoomWithUser(c *gin.Context) {
 
 }
 
+func (cc RoomController) CreateMessageWithUser(c *gin.Context) {
+	message := models.Message{}
+	uid := c.MustGet(constants.UID).(string)
+	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
+
+	if err := c.ShouldBindJSON(&message); err != nil {
+		cc.logger.Zap.Error("Error [CreatMessage] (ShouldBindJson) :", err)
+		err := errors.BadRequest.Wrap(err, "Failed to bind message data")
+		responses.HandleError(c, err)
+		return
+	}
+
+	message.RoomId = roomId
+	message.UserId = uid
+	err := cc.messageService.CreateMessageWithUser(roomId, message)
+
+	if err != nil {
+		cc.logger.Zap.Error("Error [CreatMessage] (CreateMessage) :", err.Error())
+		err := errors.BadRequest.Wrap(err, "Failed to Create Message")
+		responses.HandleError(c, err)
+		return
+	}
+
+	responses.SuccessJSON(c, http.StatusOK, message)
+
+}
+
 func (cc RoomController) GetRoomsMessages(c *gin.Context) {
 	cursor := c.Param("cursor")
 
