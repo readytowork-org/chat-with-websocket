@@ -19,7 +19,11 @@ func NewMessageRepository(
 	}
 }
 
-func (c MessageReposiotry) GetMessagesWithUser( roomId int64, cursor string) (messages []models.Message, err error) {
+func (c MessageReposiotry) CreateMessageWithUser(roomId int64, Messages models.Message) error {
+	return c.db.DB.Create(&Messages).Where("room_id = ?", roomId).Error
+}
+
+func (c MessageReposiotry) GetMessagesWithUser(roomId int64, cursor string) (messages []models.Message, err error) {
 	queryBuilder := c.db.DB.Model(&models.Message{}).Order("created_at desc").Where("room_id =?", roomId).Find(&messages).Limit(20)
 	if cursor != "" {
 		time, _ := time.Parse(time.RFC3339, cursor)
