@@ -4,6 +4,7 @@ import (
 	"boilerplate-api/infrastructure"
 	"boilerplate-api/models"
 	"boilerplate-api/utils"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -38,7 +39,7 @@ func (c UserRepository) Create(User models.User) (models.User, error) {
 }
 
 // GetAllUser -> Get All users
-func (c UserRepository) GetAllUsers(pagination utils.Pagination) ([]models.User, int64, error) {
+func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string) ([]models.User, int64, error) {
 	var users []models.User
 	var totalRows int64 = 0
 	queryBuilder := c.db.DB.Limit(pagination.PageSize).Offset(pagination.Offset).Order("created_at desc")
@@ -47,6 +48,11 @@ func (c UserRepository) GetAllUsers(pagination utils.Pagination) ([]models.User,
 	if pagination.Keyword != "" {
 		searchQuery := "%" + pagination.Keyword + "%"
 		queryBuilder.Where(c.db.DB.Where("`users`.`name` LIKE ?", searchQuery))
+	}
+
+	if cursor != "" {
+		time, _ := time.Parse(time.RFC3339, cursor)
+		queryBuilder = queryBuilder.Where("created_at < ?", time)
 	}
 
 	err := queryBuilder.
