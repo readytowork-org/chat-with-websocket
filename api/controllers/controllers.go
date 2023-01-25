@@ -7,4 +7,5 @@ var Module = fx.Options(
 	fx.Provide(NewUserController),
 	fx.Provide(NewRoomController),
 	fx.Provide(NewWebSocketServer),
+	fx.Provide(NewFollowersController),
 )
