@@ -8,4 +8,5 @@ var Module = fx.Options(
 	fx.Provide(NewRoomRepository),
 	fx.Provide(NewUserRoomRepository),
 	fx.Provide(NewMessageRepository),
+	fx.Provide(NewFollowersRepository),
 )
