@@ -2,7 +2,6 @@ CREATE TABLE IF NOT EXISTS user_rooms
 (
     user_id    VARCHAR(28) NOT NULL,
     room_id    INT         NOT NULL,
-    is_private BOOL NOT NULL,
     created_at DATETIME    NOT NULL,
     updated_at DATETIME    NULL,
     deleted_at DATETIME    NULL,
