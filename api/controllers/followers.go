@@ -98,8 +98,8 @@ func (cc FollowersController) UnFollower(c *gin.Context) {
 
 	followers, err := cc.followersService.UnFollower(followers)
 	if err != nil {
-		cc.logger.Zap.Error("Error [Adding Friend] (AddFollowers) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to add friend")
+		cc.logger.Zap.Error("Error [UnFollow Friend] (UnFollow Followers) :", err)
+		err := errors.BadRequest.Wrap(err, "Failed to UnFollow friend")
 		responses.HandleError(c, err)
 		return
 	}
