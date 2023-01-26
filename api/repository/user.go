@@ -47,7 +47,7 @@ func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string) 
 
 	if pagination.Keyword != "" {
 		searchQuery := "%" + pagination.Keyword + "%"
-		queryBuilder.Where(c.db.DB.Where("`users`.`name` LIKE ?", searchQuery))
+		queryBuilder.Where(c.db.DB.Where("`users`.`email` LIKE ?", searchQuery))
 	}
 
 	if cursor != "" {
