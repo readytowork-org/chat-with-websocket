@@ -38,11 +38,13 @@ func (c RoomRepository) GetRoomWithUser(userID string, cursor string) (userRooms
 	queryBuilder := c.db.DB.Model(&models.Room{}).Joins("JOIN user_rooms ON rooms.id = user_rooms.room_id").
 		Where("user_rooms.user_id IN (?)", c.db.DB.Model(&models.Followers{}).
 			Select("followers.user_id").
-			Where("followers.follow_user_id = ?", userID)).Or("user_rooms.user_id IN (?)", c.db.DB.Model(&models.Followers{}).
-		Select("followers.follow_user_id").
-		Where("followers.user_id = ?", userID)).
+			Where("followers.follow_user_id = ?", userID)).
+		Or("user_rooms.user_id IN (?)", c.db.DB.Model(&models.Followers{}).
+			Select("followers.follow_user_id").
+			Where("followers.user_id = ?", userID)).
+		Preload("Users").
 		Find(&userRooms).Limit(20)
-		
+
 	return userRooms, queryBuilder.Error
 }
 
