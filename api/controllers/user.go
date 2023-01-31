@@ -71,7 +71,8 @@ func (cc UserController) CreateUser(c *gin.Context) {
 func (cc UserController) GetAllUsers(c *gin.Context) {
 	pagination := utils.BuildPagination(c)
 	cursor := c.Param("cursor")
-	users, count, err := cc.userService.GetAllUsers(pagination, cursor)
+	userId := c.MustGet(constants.UID).(string)
+	users, count, err := cc.userService.GetAllUsers(pagination, cursor, userId)
 
 	if err != nil {
 		cc.logger.Zap.Error("Error finding user records", err.Error())
