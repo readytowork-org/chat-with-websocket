@@ -39,11 +39,18 @@ func (c UserRepository) Create(User models.User) (models.User, error) {
 }
 
 // GetAllUser -> Get All users
-func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string) ([]models.User, int64, error) {
+func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, userId string) ([]models.User, int64, error) {
 	var users []models.User
 	var totalRows int64 = 0
+	followers := c.db.DB
+
 	queryBuilder := c.db.DB.Limit(pagination.PageSize).Offset(pagination.Offset).Order("created_at desc")
 	queryBuilder = queryBuilder.Model(&models.User{})
+
+	followers.Model(&models.Followers{}).
+		Select("IF (followers.user_id IS NOT NULL, true, false)").
+		Where("followers.user_id = ?", userId).Or("followers.follow_user_id = ?", userId, "as follow_status from users").
+		Where("created_at < ? AND deleted_at IS NOT NULL AND user_id NOT EQUAL ? ", cursor, userId)
 
 	if pagination.Keyword != "" {
 		searchQuery := "%" + pagination.Keyword + "%"
