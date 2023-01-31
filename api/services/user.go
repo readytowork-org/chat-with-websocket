@@ -33,6 +33,6 @@ func (c UserService) CreateUser(user models.User) (models.User, error) {
 }
 
 // GetAllUser -> call to get all the User
-func (c UserService) GetAllUsers(pagination utils.Pagination, cursor string) ([]models.User, int64, error) {
-	return c.repository.GetAllUsers(pagination, cursor)
+func (c UserService) GetAllUsers(pagination utils.Pagination, cursor string, userId string) ([]models.User, int64, error) {
+	return c.repository.GetAllUsers(pagination, cursor, userId)
 }
