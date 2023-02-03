@@ -27,7 +27,7 @@ func (c RoomService) CreateRoom(room models.Room) (models.Room, error) {
 
 }
 
-func (c RoomService) GetRoomWithUser(ID string, cursor string) ([]models.Room, error) {
+func (c RoomService) GetRoomWithUser(ID string, cursor string) ([]models.RoomWithUsers, error) {
 	return c.repository.GetRoomWithUser(ID, cursor)
 }
 
