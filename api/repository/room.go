@@ -33,9 +33,9 @@ func (c RoomRepository) CreateRoom(Room models.Room) (models.Room, error) {
 	return Room, c.db.DB.Create(&Room).Error
 }
 
-func (c RoomRepository) GetRoomWithUser(userID string, cursor string) (userRooms []models.Room, err error) {
+func (c RoomRepository) GetRoomWithUser(userID string, cursor string) (userRooms []models.RoomWithUsers, err error) {
 
-	queryBuilder := c.db.DB.Model(&models.Room{}).Joins("JOIN user_rooms ON rooms.id = user_rooms.room_id").
+	queryBuilder := c.db.DB.Model(&models.RoomWithUsers{}).Joins("JOIN user_rooms ON rooms.id = user_rooms.room_id").
 		Where("user_rooms.user_id IN (?)", c.db.DB.Model(&models.Followers{}).
 			Select("followers.user_id").
 			Where("followers.follow_user_id = ?", userID)).
