@@ -7,6 +7,11 @@ type User struct {
 	FullName string `json:"full_name"`
 }
 
+type UserWithFalano struct {
+	User
+	FollowStatus bool `json:"follow_status" `
+}
+
 // TableName gives table name of model
 func (m User) TableName() string {
 	return "users"
