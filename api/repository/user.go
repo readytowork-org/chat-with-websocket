@@ -38,18 +38,21 @@ func (c UserRepository) Create(User models.User) (models.User, error) {
 }
 
 //GetAllUsers -> Get all users
-func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, userId string) (users []models.User, count int64, err error) {
+func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, userId string) (users []models.UserWithFollow, count int64, err error) {
 	var totalRows int64 = 0
 	queryBuilder := c.db.DB.Limit(pagination.PageSize).Offset(pagination.Offset).Order("created_at desc")
 	queryBuilder = queryBuilder.Model(&models.User{}).
-		Select("users.* , (?) as follow_status", c.db.DB.Model(&models.Followers{}).
-			Select("IF (followers.user_id IS NOT NULL, true, false)").
-			Where("followers.user_id = ?", userId).Or("followers.follow_user_id = ?", userId).Limit(1)).
-		Where(" users.id != ?", userId)
+		Select("users.*, (?) as follow_status",
+			c.db.DB.Model(&models.Followers{}).
+				Select("IF (followers.user_id IS NOT NULL, true, false)").
+				Where("followers.user_id = ?", userId).
+				Or("followers.follow_user_id = ?", userId).
+				Limit(1)).
+		Where("users.id != ?", userId)
 
 	if pagination.Keyword != "" {
 		searchQuery := "%" + pagination.Keyword + "%"
-		queryBuilder.Where(c.db.DB.Where("`users`.`email` LIKE ?", searchQuery))
+		queryBuilder.Where("`users`.`email` LIKE ?", searchQuery)
 	}
 
 	if cursor != "" {

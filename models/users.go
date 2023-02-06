@@ -7,7 +7,7 @@ type User struct {
 	FullName string `json:"full_name"`
 }
 
-type UserWithFalano struct {
+type UserWithFollow struct {
 	User
 	FollowStatus bool `json:"follow_status" `
 }
