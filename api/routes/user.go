@@ -23,7 +23,7 @@ func (i UserRoutes) Setup() {
 
 	users := i.router.Gin.Group("/users").Use(i.firebaseAuth.AuthJWT())
 	{
-		users.GET("/get-all/:cursor", i.userController.GetAllUsers)
+		users.GET("/get-all", i.userController.GetAllUsers)
 	}
 }
 

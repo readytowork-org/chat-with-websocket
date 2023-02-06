@@ -72,7 +72,7 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 
 func (cc RoomController) GetRoomWithUser(c *gin.Context) {
 	ID := c.MustGet(constants.UID).(string)
-	cursor := c.Param("cursor")
+	cursor := c.Query("cursor")
 	room, err := cc.roomService.GetRoomWithUser(ID, cursor)
 	if err != nil {
 		cc.logger.Zap.Error("Error finding users room records", err.Error())
@@ -100,7 +100,6 @@ func (cc RoomController) CreateMessageWithUser(c *gin.Context) {
 	message.RoomId = roomId
 	message.UserId = uid
 	err := cc.messageService.CreateMessageWithUser(roomId, message)
-
 	if err != nil {
 		cc.logger.Zap.Error("Error [CreatMessage] (CreateMessage) :", err.Error())
 		err := errors.BadRequest.Wrap(err, "Failed to Create Message")
@@ -113,7 +112,7 @@ func (cc RoomController) CreateMessageWithUser(c *gin.Context) {
 }
 
 func (cc RoomController) GetRoomsMessages(c *gin.Context) {
-	cursor := c.Param("cursor")
+	cursor := c.Query("cursor")
 
 	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
 

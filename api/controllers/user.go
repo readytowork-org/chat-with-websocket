@@ -70,7 +70,7 @@ func (cc UserController) CreateUser(c *gin.Context) {
 // GetAllUser -> Get All User
 func (cc UserController) GetAllUsers(c *gin.Context) {
 	pagination := utils.BuildPagination(c)
-	cursor := c.Param("cursor")
+	cursor := c.Query("cursor")
 	userId := c.MustGet(constants.UID).(string)
 	users, count, err := cc.userService.GetAllUsers(pagination, cursor, userId)
 
