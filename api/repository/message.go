@@ -6,29 +6,53 @@ import (
 	"time"
 )
 
-type MessageReposiotry struct {
-	db infrastructure.Database
+//MessageRepository -> MessageRepository
+type MessageRepository struct {
+	db             infrastructure.Database
+	userRepository UserRepository
 }
 
+//NewMessageRepository -> MessageRepository
 func NewMessageRepository(
 	db infrastructure.Database,
-
-) MessageReposiotry {
-	return MessageReposiotry{
-		db: db,
+	userRepository UserRepository,
+) MessageRepository {
+	return MessageRepository{
+		db:             db,
+		userRepository: userRepository,
 	}
 }
 
-func (c MessageReposiotry) CreateMessageWithUser(roomId int64, Messages models.Message) error {
-	return c.db.DB.Create(&Messages).Where("room_id = ?", roomId).Error
-}
+//GetMessagesWithUser -> Get messages with user
+func (c MessageRepository) GetMessagesWithUser(roomId int64, cursor string) (messages []models.UserMessage, err error) {
+	queryBuilder := c.db.DB.
+		Model(&messages).
+		Where("room_id = ?", roomId)
 
-func (c MessageReposiotry) GetMessagesWithUser(roomId int64, cursor string) (messages []models.Message, err error) {
-	queryBuilder := c.db.DB.Model(&models.Message{}).Order("created_at desc").Where("room_id =?", roomId).Find(&messages).Limit(20)
 	if cursor != "" {
-		time, _ := time.Parse(time.RFC3339, cursor)
-		queryBuilder = queryBuilder.Where("created_at < ?", time)
+		parsedCursor, _ := time.Parse(time.RFC3339, cursor)
+		queryBuilder = queryBuilder.Where("created_at < ?", parsedCursor)
 	}
 
-	return messages, queryBuilder.Error
+	return messages, queryBuilder.Order("created_at DESC").
+		Limit(20).
+		Preload("User").
+		Find(&messages).
+		Error
+}
+
+//SaveMessageToRoom -> Save message to room
+func (c MessageRepository) SaveMessageToRoom(message models.UserMessage) (models.UserMessage, error) {
+	err := c.db.DB.Create(&message).Error
+	if err != nil {
+		return message, err
+	}
+	user, err := c.userRepository.GetOneUserById(message.UserId)
+	if err != nil {
+		return message, err
+	}
+
+	message.User = user
+
+	return message, err
 }

@@ -52,7 +52,6 @@ func (c RoomRepository) GetRoomWithUser(userID string, cursor string) (userRooms
 	return userRooms, queryBuilder.Find(&userRooms).Limit(15).Error
 }
 
-func (c RoomRepository) GetRoomWithId(roomId int64) (room models.Room, err error) {
-
+func (c RoomRepository) GetRoomById(roomId int64) (room models.Room, err error) {
 	return room, c.db.DB.Model(&models.Room{}).Where("id =?", roomId).First(&room).Error
 }

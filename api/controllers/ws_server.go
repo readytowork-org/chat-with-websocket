@@ -2,116 +2,92 @@ package controllers
 
 import (
 	"boilerplate-api/api/services"
+	"boilerplate-api/constants"
 	"boilerplate-api/infrastructure"
-	"boilerplate-api/models"
 	"encoding/json"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"strconv"
 )
 
 type WsServer struct {
-	chatRoom    map[int64]*Server
-	logger      infrastructure.Logger
-	roomService services.RoomService
-	roomId      chan int64
+	servers        map[int64]*ChatRoom
+	newRoomId      chan int64
+	logger         infrastructure.Logger
+	roomService    services.RoomService
+	userService    services.UserService
+	messageService services.MessageService
 }
 
-func NewWebSocketServer(logger infrastructure.Logger, roomService services.RoomService) *WsServer {
+func NewWebSocketServer(
+	logger infrastructure.Logger,
+	roomService services.RoomService,
+	userService services.UserService,
+	messageService services.MessageService,
+) *WsServer {
 	return &WsServer{
-		logger:      logger,
-		chatRoom:    make(map[int64]*Server),
-		roomService: roomService,
-		roomId:      make(chan int64),
+		logger:         logger,
+		servers:        make(map[int64]*ChatRoom),
+		newRoomId:      make(chan int64),
+		roomService:    roomService,
+		userService:    userService,
+		messageService: messageService,
 	}
 }
 
-type Server struct {
-	Clients    map[*WsClient]bool
-	Register   chan *WsClient
-	UnRegister chan *WsClient
-	Broadcase  chan []byte
-	Room       models.Room
-}
-
-func (w WsServer) ServerWs(c *gin.Context) {
-
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+func (w *WsServer) ServerWs(c *gin.Context) {
+	conn, err := wsUpgrade.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		w.logger.Zap.Error("Error creating upgrader ", err.Error())
+		w.logger.Zap.Error("Error creating wsUpgrade ", err.Error())
 		return
 	}
 
 	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
-
-	room, err := w.roomService.GetRoomWithId(roomId)
+	room, err := w.roomService.GetRoomById(roomId)
 	if err != nil {
 		w.logger.Zap.Error("No room found", err.Error())
-		bytMsg, _ := json.Marshal(gin.H{"msg": "Room Not Found!"})
-		conn.WriteMessage(websocket.TextMessage, bytMsg)
+		bytMsg, _ := json.Marshal(gin.H{"msg": "room Not Found!"})
+		err = conn.WriteMessage(websocket.TextMessage, bytMsg)
+		if err != nil {
+			w.logger.Zap.Error("WriteMessage", err.Error())
+			return
+		}
 		return
 	}
-	server := w.chatRoom[roomId]
-	if server == nil {
-		w.chatRoom[roomId] = &Server{
-			Clients:    make(map[*WsClient]bool),
-			Register:   make(chan *WsClient),
-			UnRegister: make(chan *WsClient),
-			Broadcase:  make(chan []byte),
-			Room:       room,
-		}
-		w.roomId <- roomId
 
-		server = w.chatRoom[roomId]
+	userId := c.MustGet(constants.UID).(string)
+	user, err := w.userService.GetOneUserById(userId)
+	if err != nil {
+		w.logger.Zap.Error("No user found", err.Error())
+		bytMsg, _ := json.Marshal(gin.H{"msg": "User Not Found!"})
+		err = conn.WriteMessage(websocket.TextMessage, bytMsg)
+		if err != nil {
+			w.logger.Zap.Error("WriteMessage", err.Error())
+			return
+		}
+		return
 	}
 
-	client := NewClient(conn, server)
+	server := w.servers[roomId]
+	if server == nil {
+		w.servers[roomId] = NewChatRoom(room, w.logger, w.messageService)
+		server = w.servers[roomId]
+		w.newRoomId <- roomId
+	}
+
+	client := NewClient(conn, server, user)
 
 	go client.writePump()
 	go client.readPump()
 
-	server.Register <- client
-
+	server.register <- client
 }
 
-func (w WsServer) RunServer() {
-
+func (w *WsServer) RunServer() {
 	for {
 		select {
-		case room := <-w.roomId:
-			go w.chatRoom[room].Run()
+		case roomId := <-w.newRoomId:
+			go w.servers[roomId].Run()
 		}
-	}
-
-}
-
-func (server *Server) Run() {
-	for {
-		select {
-		case client := <-server.Register:
-			server.RegisterClient(client)
-		case client := <-server.UnRegister:
-			server.UnRegisterClient(client)
-		case message := <-server.Broadcase:
-			server.BroadcastToClient(message)
-		}
-	}
-
-}
-
-func (server *Server) RegisterClient(client *WsClient) {
-	server.Clients[client] = true
-}
-
-func (server *Server) UnRegisterClient(client *WsClient) {
-	if ok := server.Clients[client]; ok {
-		delete(server.Clients, client)
-	}
-}
-func (server *Server) BroadcastToClient(message []byte) {
-	for client := range server.Clients {
-		println("sending msg : ")
-		client.Send <- message
 	}
 }

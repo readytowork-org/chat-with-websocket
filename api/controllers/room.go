@@ -52,7 +52,7 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 	room, err := cc.roomService.WithTrx(transaction).CreateRoom(room)
 	if err != nil {
 		cc.logger.Zap.Error("Error [CreatRoom] (CreateRoom) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to Create Room")
+		err := errors.BadRequest.Wrap(err, "Failed to Create room")
 		responses.HandleError(c, err)
 		return
 	}
@@ -62,12 +62,12 @@ func (cc RoomController) CreateRoom(c *gin.Context) {
 
 	if err != nil {
 		cc.logger.Zap.Error("Error [UserRoom] (userRoom) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to Create user Room")
+		err := errors.BadRequest.Wrap(err, "Failed to Create user room")
 		responses.HandleError(c, err)
 		return
 	}
 
-	responses.SuccessJSON(c, http.StatusOK, "Room Created Successfully")
+	responses.SuccessJSON(c, http.StatusOK, "room Created Successfully")
 }
 
 func (cc RoomController) GetRoomWithUser(c *gin.Context) {
@@ -82,40 +82,11 @@ func (cc RoomController) GetRoomWithUser(c *gin.Context) {
 	}
 
 	responses.JSON(c, http.StatusOK, room)
-
-}
-
-func (cc RoomController) CreateMessageWithUser(c *gin.Context) {
-	message := models.Message{}
-	uid := c.MustGet(constants.UID).(string)
-	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
-
-	if err := c.ShouldBindJSON(&message); err != nil {
-		cc.logger.Zap.Error("Error [CreatMessage] (ShouldBindJson) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to bind message data")
-		responses.HandleError(c, err)
-		return
-	}
-
-	message.RoomId = roomId
-	message.UserId = uid
-	err := cc.messageService.CreateMessageWithUser(roomId, message)
-	if err != nil {
-		cc.logger.Zap.Error("Error [CreatMessage] (CreateMessage) :", err.Error())
-		err := errors.BadRequest.Wrap(err, "Failed to Create Message")
-		responses.HandleError(c, err)
-		return
-	}
-
-	responses.SuccessJSON(c, http.StatusOK, message)
-
 }
 
 func (cc RoomController) GetRoomsMessages(c *gin.Context) {
-	cursor := c.Query("cursor")
-
 	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
-
+	cursor := c.Query("cursor")
 	messages, err := cc.messageService.GetMessageWithUser(roomId, cursor)
 	if err != nil {
 		cc.logger.Zap.Error("Error finding user room's message", err.Error())
@@ -125,5 +96,4 @@ func (cc RoomController) GetRoomsMessages(c *gin.Context) {
 	}
 
 	responses.JSON(c, http.StatusOK, messages)
-
 }

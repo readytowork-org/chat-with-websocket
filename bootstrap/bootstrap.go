@@ -39,7 +39,7 @@ func bootstrap(
 	cliApp cli.Application,
 	migrations infrastructure.Migrations,
 	seeds seeds.Seeds,
-	server *controllers.WsServer,
+	wsServer *controllers.WsServer,
 ) {
 
 	appStop := func(context.Context) error {
@@ -71,12 +71,12 @@ func bootstrap(
 			logger.Zap.Info("------------------------")
 
 			go func() {
-				logger.Zap.Info("-----------Running Server-------------")
-				server.RunServer()
+				logger.Zap.Info("Running Web socket server...")
+				wsServer.RunServer()
 			}()
 
-			logger.Zap.Info("Migrating DB schema...")
 			go func() {
+				logger.Zap.Info("Migrating DB schema...")
 				migrations.Migrate()
 				middlewares.Setup()
 				routes.Setup()

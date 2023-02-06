@@ -6,21 +6,22 @@ import (
 )
 
 type MessageService struct {
-	repository repository.MessageReposiotry
+	repository repository.MessageRepository
 }
 
 func NewMessageService(
-	repository repository.MessageReposiotry,
+	repository repository.MessageRepository,
 ) MessageService {
 	return MessageService{
 		repository: repository,
 	}
 }
 
-func (c MessageService) CreateMessageWithUser(roomId int64, Messages models.Message) error {
-	return c.repository.CreateMessageWithUser(roomId, Messages)
+func (c MessageService) GetMessageWithUser(roomId int64, cursor string) (messages []models.UserMessage, err error) {
+	return c.repository.GetMessagesWithUser(roomId, cursor)
 }
 
-func (c MessageService) GetMessageWithUser(roomId int64, cursor string) (messages []models.Message, err error) {
-	return c.repository.GetMessagesWithUser(roomId, cursor)
+//SaveMessageToRoom -> Save message to room
+func (c MessageService) SaveMessageToRoom(message models.UserMessage) (models.UserMessage, error) {
+	return c.repository.SaveMessageToRoom(message)
 }
