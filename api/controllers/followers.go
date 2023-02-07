@@ -56,8 +56,8 @@ func (cc FollowersController) AddFollower(c *gin.Context) {
 		return
 	}
 
+	// TODO :: check if user room already exists, if not create else do nothing
 	room := models.Room{Name: "", IsPrivate: true}
-
 	room, err = cc.roomService.WithTrx(transaction).CreateRoom(room)
 	if err != nil {
 		cc.logger.Zap.Error("Error [CreatRoom] (CreateRoom) :", err)
@@ -65,9 +65,9 @@ func (cc FollowersController) AddFollower(c *gin.Context) {
 		responses.HandleError(c, err)
 		return
 	}
+
 	userRoom := models.UserRoom{UserId: uid, RoomId: room.ID}
 	err = cc.userRoomService.WithTrx(transaction).CreateUserRoom(userRoom)
-
 	if err != nil {
 		cc.logger.Zap.Error("Error [UserRoom] (userRoom) :", err)
 		err := errors.BadRequest.Wrap(err, "Failed to Create user Room")
