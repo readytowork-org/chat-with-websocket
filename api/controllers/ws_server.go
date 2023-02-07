@@ -36,26 +36,33 @@ func NewWebSocketServer(
 }
 
 func (w *WsServer) ServerWs(c *gin.Context) {
+	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
+	userId := c.MustGet(constants.UID).(string)
+
 	conn, err := wsUpgrade.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		w.logger.Zap.Error("Error creating wsUpgrade ", err.Error())
 		return
 	}
 
-	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
-	room, err := w.roomService.GetRoomById(roomId)
-	if err != nil {
-		w.logger.Zap.Error("No room found", err.Error())
-		bytMsg, _ := json.Marshal(gin.H{"msg": "room Not Found!"})
-		err = conn.WriteMessage(websocket.TextMessage, bytMsg)
+	server := w.servers[roomId]
+	if server == nil {
+		room, err := w.roomService.GetRoomById(roomId)
 		if err != nil {
-			w.logger.Zap.Error("WriteMessage", err.Error())
+			w.logger.Zap.Error("No room found", err.Error())
+			bytMsg, _ := json.Marshal(gin.H{"msg": "room Not Found!"})
+			err = conn.WriteMessage(websocket.TextMessage, bytMsg)
+			if err != nil {
+				w.logger.Zap.Error("WriteMessage", err.Error())
+				return
+			}
 			return
 		}
-		return
+		w.servers[roomId] = NewChatRoom(room, w.logger, w.messageService)
+		server = w.servers[roomId]
+		w.newRoomId <- roomId
 	}
 
-	userId := c.MustGet(constants.UID).(string)
 	user, err := w.userService.GetOneUserById(userId)
 	if err != nil {
 		w.logger.Zap.Error("No user found", err.Error())
@@ -66,13 +73,6 @@ func (w *WsServer) ServerWs(c *gin.Context) {
 			return
 		}
 		return
-	}
-
-	server := w.servers[roomId]
-	if server == nil {
-		w.servers[roomId] = NewChatRoom(room, w.logger, w.messageService)
-		server = w.servers[roomId]
-		w.newRoomId <- roomId
 	}
 
 	client := NewClient(conn, server, user)
