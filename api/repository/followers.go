@@ -3,8 +3,8 @@ package repository
 import (
 	"boilerplate-api/infrastructure"
 	"boilerplate-api/models"
-
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type FollowersRepository struct {
@@ -32,7 +32,9 @@ func (c FollowersRepository) WithTrx(trxHandle *gorm.DB) FollowersRepository {
 }
 
 func (c FollowersRepository) AddFollower(Follower models.Followers) (models.Followers, error) {
-	return Follower, c.db.DB.Create(&Follower).Error
+	return Follower, c.db.DB.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(&Follower).Error
 }
 
 func (c FollowersRepository) UnFollower(Follower models.Followers) (models.Followers, error) {
