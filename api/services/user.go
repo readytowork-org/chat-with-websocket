@@ -41,3 +41,7 @@ func (c UserService) GetAllUsers(pagination utils.Pagination, cursor string, use
 func (c UserService) GetOneUserById(userId string) (user models.User, err error) {
 	return c.repository.GetOneUserById(userId)
 }
+
+func (c UserService) GetUsersByRoomId(roomId int64, userId string) ([]models.User, error) {
+	return c.repository.GetUsersByRoomId(roomId, userId)
+}

@@ -66,3 +66,13 @@ func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, 
 func (c UserRepository) GetOneUserById(userId string) (user models.User, err error) {
 	return user, c.db.DB.Model(&user).Where("id = ?", userId).First(&user).Error
 }
+
+func (c UserRepository) GetUsersByRoomId(roomId int64, userId string) (users []models.User, err error) {
+	return users, c.db.DB.
+		Model(&models.User{}).
+		Joins("JOIN user_rooms UR ON users.id = UR.user_id").
+		Where("user_id != ?", userId).
+		Where("room_id = ?", roomId).
+		Find(&users).
+		Error
+}
