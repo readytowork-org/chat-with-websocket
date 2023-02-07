@@ -89,12 +89,10 @@ func (cc FollowersController) AddFollower(c *gin.Context) {
 }
 
 func (cc FollowersController) UnFollower(c *gin.Context) {
-	followers := models.Followers{}
-	uid := c.MustGet(constants.UID).(string)
-	firendsId := c.Param("fId")
-
-	followers.FollowUserId = uid
-	followers.FollowUserId = firendsId
+	followers := models.Followers{
+		UserId:       c.MustGet(constants.UID).(string),
+		FollowUserId: c.Param("fId"),
+	}
 
 	followers, err := cc.followersService.UnFollower(followers)
 	if err != nil {
