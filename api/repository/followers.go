@@ -36,5 +36,8 @@ func (c FollowersRepository) AddFollower(Follower models.Followers) (models.Foll
 }
 
 func (c FollowersRepository) UnFollower(Follower models.Followers) (models.Followers, error) {
-	return Follower, c.db.DB.Delete(&Follower).Error
+	return Follower, c.db.DB.Delete(&Follower).
+		Where("user_id = ?", Follower.UserId).
+		Where("follow_user_id = ?", Follower.FollowUserId).
+		Error
 }
