@@ -42,12 +42,11 @@ func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, 
 	queryBuilder := c.db.DB.Model(&models.User{}).
 		Limit(pagination.PageSize).
 		Order("created_at desc").
-		Select("users.*, (?) as follow_status",
+		Select("users.*, IF((?), TRUE, FALSE) as follow_status",
 			c.db.DB.Model(&models.Followers{}).
-				Select("IF (followers.user_id IS NOT NULL, true, false)").
-				Where("followers.user_id = ?", userId).
-				Or("followers.follow_user_id = ?", userId).
-				Limit(1)).
+				Select("followers.user_id != users.id OR followers.follow_user_id != users.id").
+				Where("followers.user_id = users.id").
+				Or("followers.follow_user_id = users.id")).
 		Where("users.id != ?", userId)
 
 	if pagination.Keyword != "" {
