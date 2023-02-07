@@ -38,10 +38,10 @@ func (c UserRepository) Create(User models.User) (models.User, error) {
 }
 
 //GetAllUsers -> Get all users
-func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, userId string) (users []models.UserWithFollow, count int64, err error) {
-	var totalRows int64 = 0
-	queryBuilder := c.db.DB.Limit(pagination.PageSize).Offset(pagination.Offset).Order("created_at desc")
-	queryBuilder = queryBuilder.Model(&models.User{}).
+func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, userId string) (users []models.UserWithFollow, err error) {
+	queryBuilder := c.db.DB.Model(&models.User{}).
+		Limit(pagination.PageSize).
+		Order("created_at desc").
 		Select("users.*, (?) as follow_status",
 			c.db.DB.Model(&models.Followers{}).
 				Select("IF (followers.user_id IS NOT NULL, true, false)").
@@ -56,15 +56,11 @@ func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, 
 	}
 
 	if cursor != "" {
-		time, _ := time.Parse(time.RFC3339, cursor)
-		queryBuilder = queryBuilder.Where("created_at < ?", time)
+		parsedCursor, _ := time.Parse(time.RFC3339, cursor)
+		queryBuilder = queryBuilder.Where("created_at < ?", parsedCursor)
 	}
 
-	return users, totalRows, queryBuilder.
-		Find(&users).
-		Offset(-1).
-		Limit(-1).
-		Count(&totalRows).Error
+	return users, queryBuilder.Find(&users).Error
 }
 
 //GetOneUserById -> Get one user by id

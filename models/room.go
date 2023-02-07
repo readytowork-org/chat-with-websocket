@@ -2,7 +2,8 @@ package models
 
 type Room struct {
 	Base
-	Name string `json:"name"`
+	Name      string `json:"name"`
+	IsPrivate bool   `json:"is_private"`
 }
 
 type RoomWithUsers struct {

@@ -72,8 +72,7 @@ func (cc UserController) GetAllUsers(c *gin.Context) {
 	pagination := utils.BuildPagination(c)
 	cursor := c.Query("cursor")
 	userId := c.MustGet(constants.UID).(string)
-	users, count, err := cc.userService.GetAllUsers(pagination, cursor, userId)
-
+	users, err := cc.userService.GetAllUsers(pagination, cursor, userId)
 	if err != nil {
 		cc.logger.Zap.Error("Error finding user records", err.Error())
 		err := errors.InternalError.Wrap(err, "Failed to get users data")
@@ -81,5 +80,5 @@ func (cc UserController) GetAllUsers(c *gin.Context) {
 		return
 	}
 
-	responses.JSONCount(c, http.StatusOK, users, count)
+	responses.JSON(c, http.StatusOK, users)
 }
