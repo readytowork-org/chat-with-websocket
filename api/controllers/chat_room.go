@@ -15,12 +15,14 @@ type ChatRoom struct {
 	clients        map[string]*ChatUser
 	broadcast      chan models.Message
 	messageService services.MessageService
+	chatNotifier   *ChatNotifier
 }
 
 func NewChatRoom(
 	room models.Room,
 	logger infrastructure.Logger,
 	messageService services.MessageService,
+	chatNotifier *ChatNotifier,
 ) *ChatRoom {
 	return &ChatRoom{
 		Room:           room,
@@ -30,6 +32,7 @@ func NewChatRoom(
 		broadcast:      make(chan models.Message),
 		messageService: messageService,
 		logger:         logger,
+		chatNotifier:   chatNotifier,
 	}
 }
 
@@ -46,6 +49,10 @@ func (chatRoom *ChatRoom) Run() {
 				chatRoom.logger.Zap.Error("Message saving failed", err.Error())
 				return
 			}
+			go func() {
+				chatRoom.chatNotifier.notify <- dbMessage
+			}()
+
 			bytMsg, _ := json.Marshal(dbMessage)
 			chatRoom.BroadcastToClient(bytMsg)
 		}

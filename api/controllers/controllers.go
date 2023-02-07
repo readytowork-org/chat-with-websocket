@@ -8,4 +8,5 @@ var Module = fx.Options(
 	fx.Provide(NewRoomController),
 	fx.Provide(NewChatServer),
 	fx.Provide(NewFollowersController),
+	fx.Provide(NewChatNotifier),
 )

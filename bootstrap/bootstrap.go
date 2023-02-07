@@ -40,6 +40,7 @@ func bootstrap(
 	migrations infrastructure.Migrations,
 	seeds seeds.Seeds,
 	chatServer *controllers.ChatServer,
+	chatNotifier *controllers.ChatNotifier,
 ) {
 
 	appStop := func(context.Context) error {
@@ -69,6 +70,11 @@ func bootstrap(
 			logger.Zap.Info("------------------------")
 			logger.Zap.Info("------ Boilerplate 📺 ------")
 			logger.Zap.Info("------------------------")
+
+			go func() {
+				logger.Zap.Info("Running Chat Notifier Websocket server...")
+				chatNotifier.RunServer()
+			}()
 
 			go func() {
 				logger.Zap.Info("Running Chat Websocket server...")

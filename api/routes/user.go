@@ -13,6 +13,7 @@ type UserRoutes struct {
 	userController controllers.UserController
 	trxMiddleware  middlewares.DBTransactionMiddleware
 	firebaseAuth   middlewares.FirebaseAuthMiddleWare
+	chatNotifier   *controllers.ChatNotifier
 }
 
 // Setup user routes
@@ -23,6 +24,7 @@ func (i UserRoutes) Setup() {
 
 	users := i.router.Gin.Group("/users").Use(i.firebaseAuth.AuthJWT())
 	{
+		users.GET("/notify", i.chatNotifier.ServerWs)
 		users.GET("/get-all", i.userController.GetAllUsers)
 	}
 }
@@ -34,6 +36,7 @@ func NewUserRoutes(
 	userController controllers.UserController,
 	trxMiddleware middlewares.DBTransactionMiddleware,
 	firebaseAuth middlewares.FirebaseAuthMiddleWare,
+	chatNotifier *controllers.ChatNotifier,
 ) UserRoutes {
 	return UserRoutes{
 		router:         router,
@@ -41,5 +44,6 @@ func NewUserRoutes(
 		userController: userController,
 		trxMiddleware:  trxMiddleware,
 		firebaseAuth:   firebaseAuth,
+		chatNotifier:   chatNotifier,
 	}
 }

@@ -14,6 +14,7 @@ type ChatServer struct {
 	servers        map[int64]*ChatRoom
 	newRoomId      chan int64
 	deleteRoomId   chan int64
+	chatNotifier   *ChatNotifier
 	logger         infrastructure.Logger
 	roomService    services.RoomService
 	userService    services.UserService
@@ -25,9 +26,11 @@ func NewChatServer(
 	roomService services.RoomService,
 	userService services.UserService,
 	messageService services.MessageService,
+	chatNotifier *ChatNotifier,
 ) *ChatServer {
 	return &ChatServer{
 		logger:         logger,
+		chatNotifier:   chatNotifier,
 		servers:        make(map[int64]*ChatRoom),
 		newRoomId:      make(chan int64),
 		deleteRoomId:   make(chan int64),
@@ -60,7 +63,7 @@ func (w *ChatServer) ServerWs(c *gin.Context) {
 			}
 			return
 		}
-		w.servers[roomId] = NewChatRoom(room, w.logger, w.messageService)
+		w.servers[roomId] = NewChatRoom(room, w.logger, w.messageService, w.chatNotifier)
 		server = w.servers[roomId]
 		w.newRoomId <- roomId
 	}
