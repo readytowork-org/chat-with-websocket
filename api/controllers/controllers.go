@@ -6,6 +6,6 @@ import "go.uber.org/fx"
 var Module = fx.Options(
 	fx.Provide(NewUserController),
 	fx.Provide(NewRoomController),
-	fx.Provide(NewWebSocketServer),
+	fx.Provide(NewChatServer),
 	fx.Provide(NewFollowersController),
 )

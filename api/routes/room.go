@@ -9,7 +9,7 @@ import (
 type RoomRoutes struct {
 	logger         infrastructure.Logger
 	router         infrastructure.Router
-	wsServer       *controllers.WsServer
+	chatServer     *controllers.ChatServer
 	roomController controllers.RoomController
 	middleWare     middlewares.FirebaseAuthMiddleWare
 	trxMiddleware  middlewares.DBTransactionMiddleware
@@ -21,7 +21,7 @@ func (i RoomRoutes) Setup() {
 	{
 		rooms.POST("/create", i.trxMiddleware.DBTransactionHandle(), i.roomController.CreateRoom)
 		rooms.GET("/get-rooms", i.roomController.GetRoomWithUser)
-		rooms.GET("/chat/:room-id", i.wsServer.ServerWs)
+		rooms.GET("/chat/:room-id", i.chatServer.ServerWs)
 		rooms.GET("/messages/:room-id", i.roomController.GetRoomsMessages)
 	}
 }
@@ -32,7 +32,7 @@ func NewRoomRoutes(
 	roomController controllers.RoomController,
 	middleWare middlewares.FirebaseAuthMiddleWare,
 	trxMiddleware middlewares.DBTransactionMiddleware,
-	wsServer *controllers.WsServer,
+	chatServer *controllers.ChatServer,
 ) RoomRoutes {
 	return RoomRoutes{
 		logger:         logger,
@@ -40,6 +40,6 @@ func NewRoomRoutes(
 		roomController: roomController,
 		trxMiddleware:  trxMiddleware,
 		middleWare:     middleWare,
-		wsServer:       wsServer,
+		chatServer:     chatServer,
 	}
 }

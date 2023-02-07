@@ -39,7 +39,7 @@ func bootstrap(
 	cliApp cli.Application,
 	migrations infrastructure.Migrations,
 	seeds seeds.Seeds,
-	wsServer *controllers.WsServer,
+	chatServer *controllers.ChatServer,
 ) {
 
 	appStop := func(context.Context) error {
@@ -71,8 +71,8 @@ func bootstrap(
 			logger.Zap.Info("------------------------")
 
 			go func() {
-				logger.Zap.Info("Running Web socket server...")
-				wsServer.RunServer()
+				logger.Zap.Info("Running Chat Websocket server...")
+				chatServer.RunServer()
 			}()
 
 			go func() {

@@ -10,36 +10,38 @@ import (
 	"strconv"
 )
 
-type WsServer struct {
+type ChatServer struct {
 	servers        map[int64]*ChatRoom
 	newRoomId      chan int64
+	deleteRoomId   chan int64
 	logger         infrastructure.Logger
 	roomService    services.RoomService
 	userService    services.UserService
 	messageService services.MessageService
 }
 
-func NewWebSocketServer(
+func NewChatServer(
 	logger infrastructure.Logger,
 	roomService services.RoomService,
 	userService services.UserService,
 	messageService services.MessageService,
-) *WsServer {
-	return &WsServer{
+) *ChatServer {
+	return &ChatServer{
 		logger:         logger,
 		servers:        make(map[int64]*ChatRoom),
 		newRoomId:      make(chan int64),
+		deleteRoomId:   make(chan int64),
 		roomService:    roomService,
 		userService:    userService,
 		messageService: messageService,
 	}
 }
 
-func (w *WsServer) ServerWs(c *gin.Context) {
+func (w *ChatServer) ServerWs(c *gin.Context) {
 	roomId, _ := strconv.ParseInt(c.Param("room-id"), 10, 64)
 	userId := c.MustGet(constants.UID).(string)
 
-	conn, err := wsUpgrade.Upgrade(c.Writer, c.Request, nil)
+	conn, err := constants.WsUpgrade.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		w.logger.Zap.Error("Error creating wsUpgrade ", err.Error())
 		return
@@ -75,7 +77,7 @@ func (w *WsServer) ServerWs(c *gin.Context) {
 		return
 	}
 
-	client := NewClient(conn, server, user)
+	client := NewChatUser(conn, server, user)
 
 	go client.writePump()
 	go client.readPump()
@@ -83,11 +85,13 @@ func (w *WsServer) ServerWs(c *gin.Context) {
 	server.register <- client
 }
 
-func (w *WsServer) RunServer() {
+func (w *ChatServer) RunServer() {
 	for {
 		select {
 		case roomId := <-w.newRoomId:
 			go w.servers[roomId].Run()
+		case roomId := <-w.deleteRoomId:
+			delete(w.servers, roomId)
 		}
 	}
 }

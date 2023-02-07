@@ -10,9 +10,9 @@ import (
 type ChatRoom struct {
 	models.Room
 	logger         infrastructure.Logger
-	register       chan *WsClient
-	unRegister     chan *WsClient
-	clients        map[string]*WsClient
+	register       chan *ChatUser
+	unRegister     chan *ChatUser
+	clients        map[string]*ChatUser
 	broadcast      chan models.Message
 	messageService services.MessageService
 }
@@ -24,9 +24,9 @@ func NewChatRoom(
 ) *ChatRoom {
 	return &ChatRoom{
 		Room:           room,
-		clients:        make(map[string]*WsClient),
-		register:       make(chan *WsClient),
-		unRegister:     make(chan *WsClient),
+		clients:        make(map[string]*ChatUser),
+		register:       make(chan *ChatUser),
+		unRegister:     make(chan *ChatUser),
 		broadcast:      make(chan models.Message),
 		messageService: messageService,
 		logger:         logger,
@@ -52,11 +52,11 @@ func (chatRoom *ChatRoom) Run() {
 	}
 }
 
-func (chatRoom *ChatRoom) RegisterClient(client *WsClient) {
+func (chatRoom *ChatRoom) RegisterClient(client *ChatUser) {
 	chatRoom.clients[client.User.ID] = client
 }
 
-func (chatRoom *ChatRoom) UnRegisterClient(client *WsClient) {
+func (chatRoom *ChatRoom) UnRegisterClient(client *ChatUser) {
 	if ok := chatRoom.clients[client.User.ID]; ok != nil {
 		delete(chatRoom.clients, client.User.ID)
 	}

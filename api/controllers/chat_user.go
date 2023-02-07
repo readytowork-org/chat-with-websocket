@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"boilerplate-api/constants"
 	"boilerplate-api/models"
 	"encoding/json"
 	"log"
@@ -9,42 +10,19 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-const (
-	// Max wait time when writing message to peer
-	writeWait = 10 * time.Second
-
-	// Max time till next pong from peer
-	pongWait = 60 * time.Second
-
-	// Send ping interval, must be less then pong wait time
-	pingPeriod = (pongWait * 9) / 10
-
-	// Maximum message size allowed from peer.
-	maxMessageSize = 10000
-)
-
-var (
-	newline = []byte{'\n'}
-)
-
-var wsUpgrade = websocket.Upgrader{
-	ReadBufferSize:  4096,
-	WriteBufferSize: 4096,
-}
-
-type WsClient struct {
+type ChatUser struct {
 	models.User
 	conn   *websocket.Conn
 	server *ChatRoom
 	Send   chan []byte
 }
 
-func NewClient(
+func NewChatUser(
 	conn *websocket.Conn,
 	server *ChatRoom,
 	user models.User,
-) *WsClient {
-	return &WsClient{
+) *ChatUser {
+	return &ChatUser{
 		User:   user,
 		conn:   conn,
 		server: server,
@@ -52,15 +30,15 @@ func NewClient(
 	}
 }
 
-func (client *WsClient) readPump() {
+func (client *ChatUser) readPump() {
 	defer func() {
 		client.disconnect()
 	}()
 
-	client.conn.SetReadLimit(maxMessageSize)
-	client.conn.SetReadDeadline(time.Now().Add(pongWait))
+	client.conn.SetReadLimit(constants.MaxMessageSize)
+	client.conn.SetReadDeadline(time.Now().Add(constants.PongWait))
 	client.conn.SetPongHandler(func(string) error {
-		client.conn.SetReadDeadline(time.Now().Add(pongWait))
+		client.conn.SetReadDeadline(time.Now().Add(constants.PongWait))
 		return nil
 	})
 
@@ -83,8 +61,8 @@ func (client *WsClient) readPump() {
 		client.server.broadcast <- message
 	}
 }
-func (client *WsClient) writePump() {
-	ticker := time.NewTicker(pingPeriod)
+func (client *ChatUser) writePump() {
+	ticker := time.NewTicker(constants.PingPeriod)
 	defer func() {
 		ticker.Stop()
 		client.conn.Close()
@@ -93,7 +71,7 @@ func (client *WsClient) writePump() {
 	for {
 		select {
 		case message, ok := <-client.Send:
-			client.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			client.conn.SetWriteDeadline(time.Now().Add(constants.WriteWait))
 			if !ok {
 				client.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
@@ -107,21 +85,21 @@ func (client *WsClient) writePump() {
 
 			n := len(client.Send)
 			for i := 0; i < n; i++ {
-				w.Write(newline)
+				w.Write(constants.Newline)
 				w.Write(<-client.Send)
 			}
 			if err := w.Close(); err != nil {
 				return
 			}
 		case <-ticker.C:
-			client.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			client.conn.SetWriteDeadline(time.Now().Add(constants.WriteWait))
 			if err := client.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
 		}
 	}
 }
-func (client *WsClient) disconnect() {
+func (client *ChatUser) disconnect() {
 	client.server.unRegister <- client
 	close(client.Send)
 	client.conn.Close()
