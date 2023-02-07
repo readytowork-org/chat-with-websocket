@@ -101,4 +101,6 @@ func (cc FollowersController) UnFollower(c *gin.Context) {
 		responses.HandleError(c, err)
 		return
 	}
+
+	responses.SuccessJSON(c, http.StatusOK, "Friend Removed")
 }
