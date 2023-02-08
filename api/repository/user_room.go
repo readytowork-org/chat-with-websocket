@@ -32,3 +32,7 @@ func (c UserRoomRepository) WithTrx(trxHandle *gorm.DB) UserRoomRepository {
 func (c UserRoomRepository) CreateUserRoom(userRoom models.UserRoom) error {
 	return c.db.DB.Create(&userRoom).Error
 }
+
+func (c UserRoomRepository) GetUserRoomByFollowId(followId int64) (userRoom models.UserRoom, err error) {
+	return userRoom, c.db.DB.Where("follower_id = ?", followId).First(&userRoom).Error
+}

@@ -48,28 +48,31 @@ func (cc FollowersController) AddFollower(c *gin.Context) {
 
 	followers, err := cc.followersService.WithTrx(transaction).AddFollower(followers)
 	if err != nil {
-		cc.logger.Zap.Error("Error [Adding Friend] (AddFollowers) :", err)
+		cc.logger.Zap.Error("Error [AddFollower] (AddFollowers) :", err)
 		err := errors.BadRequest.Wrap(err, "Failed to add friend")
 		responses.HandleError(c, err)
 		return
 	}
 
-	room := models.Room{Name: "", IsPrivate: true}
-	room, err = cc.roomService.WithTrx(transaction).CreateRoom(room)
+	userRoom, err := cc.userRoomService.WithTrx(transaction).GetUserRoomByFollowId(followers.ID)
 	if err != nil {
-		cc.logger.Zap.Error("Error [CreatRoom] (CreateRoom) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to Create Room")
-		responses.HandleError(c, err)
-		return
-	}
+		room := models.Room{Name: "", IsPrivate: true}
+		room, err = cc.roomService.WithTrx(transaction).CreateRoom(room)
+		if err != nil {
+			cc.logger.Zap.Error("Error [CreatRoom] (CreateRoom) :", err)
+			err := errors.BadRequest.Wrap(err, "Failed to Create Room")
+			responses.HandleError(c, err)
+			return
+		}
 
-	userRoom := models.UserRoom{FollowerId: followers.ID, RoomId: room.ID}
-	err = cc.userRoomService.WithTrx(transaction).CreateUserRoom(userRoom)
-	if err != nil {
-		cc.logger.Zap.Error("Error [UserRoom] (userRoom) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to Create user Room")
-		responses.HandleError(c, err)
-		return
+		userRoom = models.UserRoom{FollowerId: followers.ID, RoomId: room.ID}
+		err = cc.userRoomService.WithTrx(transaction).CreateUserRoom(userRoom)
+		if err != nil {
+			cc.logger.Zap.Error("Error [UserRoom] (userRoom) :", err)
+			err := errors.BadRequest.Wrap(err, "Failed to Create user Room")
+			responses.HandleError(c, err)
+			return
+		}
 	}
 
 	responses.SuccessJSON(c, http.StatusOK, "Friend Added & Room Created Successfully")

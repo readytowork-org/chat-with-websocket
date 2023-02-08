@@ -25,3 +25,7 @@ func (c UserRoomService) WithTrx(trxHandle *gorm.DB) UserRoomService {
 func (c UserRoomService) CreateUserRoom(userRoom models.UserRoom) error {
 	return c.repository.CreateUserRoom(userRoom)
 }
+
+func (c UserRoomService) GetUserRoomByFollowId(followId int64) (userRoom models.UserRoom, err error) {
+	return c.repository.GetUserRoomByFollowId(followId)
+}
