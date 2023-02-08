@@ -33,7 +33,8 @@ func (c FollowersRepository) WithTrx(trxHandle *gorm.DB) FollowersRepository {
 
 func (c FollowersRepository) AddFollower(Follower models.Followers) (models.Followers, error) {
 	return Follower, c.db.DB.Clauses(clause.OnConflict{
-		UpdateAll: true,
+		Columns:   []clause.Column{{Name: "id"}},
+		DoUpdates: clause.Assignments(map[string]interface{}{"deleted_at": gorm.Expr("NULL")}),
 	}).Create(&Follower).Error
 }
 
