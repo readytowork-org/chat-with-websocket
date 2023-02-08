@@ -42,7 +42,7 @@ func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, 
 	queryBuilder := c.db.DB.Model(&models.User{}).
 		Limit(pagination.PageSize).
 		Order("created_at desc").
-		Select("users.*, IF(F.created_at, TRUE, FALSE) AS follow_status").
+		Select("users.*, IF(F.id, TRUE, FALSE) AS follow_status").
 		Joins("LEFT JOIN followers F ON (F.user_id = users.id AND F.follow_user_id = ?) OR (F.follow_user_id = users.id AND F.user_id = ?)", userId, userId).
 		Where("users.id != ?", userId)
 
