@@ -44,9 +44,9 @@ func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, 
 		Order("created_at desc").
 		Select("users.*, IF((?), TRUE, FALSE) as follow_status",
 			c.db.DB.Model(&models.Followers{}).
-				Select("followers.user_id != users.id OR followers.follow_user_id != users.id").
-				Where("followers.user_id = users.id").
-				Or("followers.follow_user_id = users.id")).
+				Select("followers.created_at").
+				Where(c.db.DB.Where("followers.user_id = users.id").Where("followers.follow_user_id = ?", userId)).
+				Or(c.db.DB.Where("followers.follow_user_id = users.id").Where("followers.user_id = ?", userId))).
 		Where("users.id != ?", userId)
 
 	if pagination.Keyword != "" {
