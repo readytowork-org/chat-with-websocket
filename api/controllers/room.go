@@ -6,12 +6,10 @@ import (
 	"boilerplate-api/constants"
 	"boilerplate-api/errors"
 	"boilerplate-api/infrastructure"
-	"boilerplate-api/models"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type RoomController struct {
@@ -34,40 +32,6 @@ func NewRoomController(logger infrastructure.Logger,
 		env:             env,
 		messageService:  messageService,
 	}
-}
-
-func (cc RoomController) CreateRoom(c *gin.Context) {
-	room := models.Room{}
-	userRoom := models.UserRoom{}
-	transaction := c.MustGet(constants.DBTransaction).(*gorm.DB)
-	uid := c.MustGet(constants.UID).(string)
-
-	if err := c.ShouldBindJSON(&room); err != nil {
-		cc.logger.Zap.Error("Error [CreatRoom] (ShouldBindJson) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to bind room data")
-		responses.HandleError(c, err)
-		return
-	}
-
-	room, err := cc.roomService.WithTrx(transaction).CreateRoom(room)
-	if err != nil {
-		cc.logger.Zap.Error("Error [CreatRoom] (CreateRoom) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to Create room")
-		responses.HandleError(c, err)
-		return
-	}
-	userRoom.UserId = uid
-	userRoom.RoomId = room.ID
-	err = cc.userRoomService.WithTrx(transaction).CreateUserRoom(userRoom)
-
-	if err != nil {
-		cc.logger.Zap.Error("Error [UserRoom] (userRoom) :", err)
-		err := errors.BadRequest.Wrap(err, "Failed to Create user room")
-		responses.HandleError(c, err)
-		return
-	}
-
-	responses.SuccessJSON(c, http.StatusOK, "room Created Successfully")
 }
 
 func (cc RoomController) GetRoomWithUser(c *gin.Context) {

@@ -19,7 +19,6 @@ func (i RoomRoutes) Setup() {
 	i.logger.Zap.Info("Setting up room routes")
 	rooms := i.router.Gin.Group("/rooms").Use(i.middleWare.AuthJWT())
 	{
-		rooms.POST("/create", i.trxMiddleware.DBTransactionHandle(), i.roomController.CreateRoom)
 		rooms.GET("/get-rooms", i.roomController.GetRoomWithUser)
 		rooms.GET("/chat/:room-id", i.chatServer.ServerWs)
 		rooms.GET("/messages/:room-id", i.roomController.GetRoomsMessages)

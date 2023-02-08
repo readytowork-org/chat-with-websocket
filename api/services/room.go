@@ -24,7 +24,6 @@ func (c RoomService) WithTrx(trxHandle *gorm.DB) RoomService {
 
 func (c RoomService) CreateRoom(room models.Room) (models.Room, error) {
 	return c.repository.CreateRoom(room)
-
 }
 
 func (c RoomService) GetRoomWithUser(ID string, cursor string) ([]models.RoomWithUsers, error) {
