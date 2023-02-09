@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS followers
     PRIMARY KEY (id),
     CONSTRAINT followers_unique
         UNIQUE (follow_user_id, user_id),
-    INDEX follow_user_id_fk_idx (id ASC) VISIBLE,
+    INDEX follow_user_id_fk_idx (id ASC),
     CONSTRAINT f_user_id_fk
         FOREIGN KEY (user_id)
             REFERENCES users (id)
