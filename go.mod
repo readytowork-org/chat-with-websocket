@@ -18,6 +18,6 @@ require (
 	go.uber.org/zap v1.21.0
 	golang.org/x/text v0.4.0
 	google.golang.org/api v0.102.0
-	gorm.io/driver/mysql v1.1.2
-	gorm.io/gorm v1.21.16
+	gorm.io/driver/mysql v1.4.6
+	gorm.io/gorm v1.24.5
 )
