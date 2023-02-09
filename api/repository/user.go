@@ -67,7 +67,8 @@ func (c UserRepository) GetOneUserById(userId string) (user models.User, err err
 func (c UserRepository) GetUsersByRoomId(roomId int64, userId string) (users []models.User, err error) {
 	return users, c.db.DB.
 		Model(&models.User{}).
-		Joins("JOIN user_rooms UR ON users.id = UR.user_id").
+		Joins("JOIN followers F ON users.id = F.follow_user_id OR users.id = F.user_id").
+		Joins("LEFT JOIN user_rooms ur ON ur.follower_id = F.id").
 		Where("user_id != ?", userId).
 		Where("room_id = ?", roomId).
 		Find(&users).

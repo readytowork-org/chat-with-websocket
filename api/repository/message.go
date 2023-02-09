@@ -34,9 +34,10 @@ func (c MessageRepository) GetMessagesWithUser(roomId int64, cursor string) (mes
 		queryBuilder = queryBuilder.Where("created_at < ?", parsedCursor)
 	}
 
-	return messages, queryBuilder.Order("created_at DESC").
-		Limit(20).
+	return messages, queryBuilder.
 		Preload("User").
+		Order("created_at DESC").
+		Limit(20).
 		Find(&messages).
 		Error
 }
