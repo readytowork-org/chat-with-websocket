@@ -8,7 +8,7 @@ type Room struct {
 
 type RoomWithUsers struct {
 	Room
-	Users []User `json:"users" gorm:"many2many:user_rooms;joinForeignKey:room_id"`
+	Users []RoomsUser `json:"users" gorm:"foreignKey:room_id"`
 }
 
 func (r Room) TableName() string {
