@@ -31,3 +31,7 @@ func (c FollowersService) AddFollower(Follower models.Followers) (models.Followe
 func (c FollowersService) UnFollower(Follower models.Followers) (models.Followers, error) {
 	return c.repository.UnFollower(Follower)
 }
+
+func (c FollowersService) GetFollower(Follower models.Followers) (models.Followers, error) {
+	return c.repository.GetFollower(Follower)
+}

@@ -53,7 +53,7 @@ func (c UserRepository) GetAllUsers(pagination utils.Pagination, cursor string, 
 
 	if cursor != "" {
 		parsedCursor, _ := time.Parse(time.RFC3339, cursor)
-		queryBuilder = queryBuilder.Where("created_at < ?", parsedCursor)
+		queryBuilder = queryBuilder.Where("users.created_at < ?", parsedCursor)
 	}
 
 	return users, queryBuilder.Find(&users).Error

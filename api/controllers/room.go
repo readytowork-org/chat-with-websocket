@@ -13,24 +13,23 @@ import (
 )
 
 type RoomController struct {
-	logger          infrastructure.Logger
-	roomService     services.RoomService
-	userRoomService services.UserRoomService
-	messageService  services.MessageService
-	env             infrastructure.Env
+	logger         infrastructure.Logger
+	roomService    services.RoomService
+	messageService services.MessageService
+	env            infrastructure.Env
 }
 
-func NewRoomController(logger infrastructure.Logger,
+func NewRoomController(
+	logger infrastructure.Logger,
 	roomService services.RoomService,
-	userRoomService services.UserRoomService,
 	messageService services.MessageService,
-	env infrastructure.Env) RoomController {
+	env infrastructure.Env,
+) RoomController {
 	return RoomController{
-		logger:          logger,
-		roomService:     roomService,
-		userRoomService: userRoomService,
-		env:             env,
-		messageService:  messageService,
+		logger:         logger,
+		roomService:    roomService,
+		env:            env,
+		messageService: messageService,
 	}
 }
 

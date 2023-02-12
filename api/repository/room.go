@@ -42,15 +42,13 @@ func (c RoomRepository) GetRoomWithUser(userID string, cursor string) (userRooms
 	}
 
 	queryBuilder = queryBuilder.
-		Select("rooms.*, F.follow_user_id, F.user_id").
-		Joins("LEFT JOIN user_rooms ON rooms.id = user_rooms.room_id").
-		Joins("LEFT JOIN followers F ON user_rooms.follower_id = F.id AND F.deleted_at IS NULL").
-		Where(c.db.DB.Where("F.user_id = ?", userID).Or("F.follow_user_id = ?", userID)).
+		Joins("LEFT JOIN followers f ON rooms.follower_id = f.id AND f.deleted_at IS NULL").
+		Where(c.db.DB.Where("f.user_id = ?", userID).Or("f.follow_user_id = ?", userID)).
 		Preload("Users", func(db *gorm.DB) *gorm.DB {
 			return db.Table("(?) as users", c.db.DB.Model(&models.RoomsUser{}).
-				Select("users.*, room_id").
-				Joins("JOIN followers F ON users.id = F.follow_user_id OR users.id = F.user_id").
-				Joins("LEFT JOIN user_rooms ur ON ur.follower_id = F.id"))
+				Select("users.*, r.id AS room_id").
+				Joins("JOIN followers f ON (f.follow_user_id = users.id OR f.user_id = users.id) AND (f.user_id = users.id OR f.follow_user_id = users.id)").
+				Joins("JOIN rooms r ON r.follower_id = f.id"))
 		})
 
 	return userRooms, queryBuilder.Find(&userRooms).Limit(15).Error
@@ -58,4 +56,11 @@ func (c RoomRepository) GetRoomWithUser(userID string, cursor string) (userRooms
 
 func (c RoomRepository) GetRoomById(roomId int64) (room models.Room, err error) {
 	return room, c.db.DB.Model(&models.Room{}).Where("id =?", roomId).First(&room).Error
+}
+
+func (c RoomRepository) GetRoomByFollowerId(followerId int64) (room models.Room, err error) {
+	return room, c.db.DB.Model(&models.Room{}).
+		Where("follower_id = ?", followerId).
+		First(&room).
+		Error
 }

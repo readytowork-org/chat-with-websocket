@@ -64,10 +64,10 @@ func (cc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	responses.JSON(c, http.StatusOK, newUser)
+	responses.JSON(c, http.StatusCreated, newUser)
 }
 
-// GetAllUser -> Get All User
+// GetAllUsers -> Get All User
 func (cc UserController) GetAllUsers(c *gin.Context) {
 	pagination := utils.BuildPagination(c)
 	cursor := c.Query("cursor")

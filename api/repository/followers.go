@@ -40,8 +40,27 @@ func (c FollowersRepository) AddFollower(Follower models.Followers) (models.Foll
 
 func (c FollowersRepository) UnFollower(Follower models.Followers) (models.Followers, error) {
 	return Follower, c.db.DB.
-		Where("user_id = ?", Follower.UserId).
-		Where("follow_user_id = ?", Follower.FollowUserId).
+		Where(
+			c.db.DB.Where("user_id = ?", Follower.UserId).
+				Where("follow_user_id = ?", Follower.FollowUserId),
+		).Or(
+		c.db.DB.Where("follow_user_id = ?", Follower.UserId).
+			Where("user_id = ?", Follower.FollowUserId),
+	).
 		Delete(&Follower).
+		Error
+}
+
+func (c FollowersRepository) GetFollower(Follower models.Followers) (models.Followers, error) {
+	return Follower, c.db.DB.
+		Where(
+			c.db.DB.Where("user_id = ?", Follower.UserId).
+				Where("follow_user_id = ?", Follower.FollowUserId),
+		).Or(
+		c.db.DB.Where("follow_user_id = ?", Follower.UserId).
+			Where("user_id = ?", Follower.FollowUserId),
+	).
+		Unscoped().
+		First(&Follower).
 		Error
 }

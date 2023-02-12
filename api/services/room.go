@@ -33,3 +33,7 @@ func (c RoomService) GetRoomWithUser(ID string, cursor string) ([]models.RoomWit
 func (c RoomService) GetRoomById(roomId int64) (room models.Room, err error) {
 	return c.repository.GetRoomById(roomId)
 }
+
+func (c RoomService) GetRoomByFollowerId(followerId int64) (room models.Room, err error) {
+	return c.repository.GetRoomByFollowerId(followerId)
+}
