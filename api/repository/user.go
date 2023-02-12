@@ -68,8 +68,8 @@ func (c UserRepository) GetUsersByRoomId(roomId int64, userId string) (users []m
 	return users, c.db.DB.
 		Model(&models.User{}).
 		Joins("JOIN followers F ON ((F.user_id = users.id AND F.follow_user_id = ?) OR (F.follow_user_id = users.id AND F.user_id = ?))", userId, userId).
-		Joins("LEFT JOIN user_rooms ur ON ur.follower_id = F.id").
-		Where("room_id = ?", roomId).
+		Joins("JOIN rooms ur ON ur.follower_id = F.id").
+		Where("ur.id = ?", roomId).
 		Find(&users).
 		Error
 }
